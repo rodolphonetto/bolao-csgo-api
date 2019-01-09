@@ -4,7 +4,8 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const multer = require('multer')
 
-const countries = require('./routes/countries')
+const country = require('./routes/country')
+const team = require('./routes/team')
 
 const app = express()
 const db = require('./config/keys').mongoURI
@@ -37,7 +38,8 @@ app.use(multer({storage: fileStorage, filefilter: fileFilter}).single('image'))
 app.use('/images', express.static(path.join(__dirname, 'images')))
 
 
-app.use('/countries', countries)
+app.use('/countries', country)
+app.use('/teams', team)
 
 const port = process.env.PORT || 5000
 

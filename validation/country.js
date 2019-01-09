@@ -6,17 +6,17 @@ module.exports = function validateCountry(data) {
 
 	data.name = !isEmpty(data.name) ? data.name : ''
 	data.file = !isEmpty(data.file) ? data.file : ''
+
+	if (Validator.isEmpty(data.name)) {
+		errors.nameEmpty = 'Nome de pais precisa ser preenchido'
+	}
 	
 	if (!Validator.isLength(data.name, {min: 2, max: 30})) {
 		errors.name = 'Nome do pais precisa ter entre 2 e 30 caracteres'
 	}
 	
-	if (Validator.isEmpty(data.name)) {
-		errors.name = 'Nome de pais precisa ser preenchido'
-	}
-
 	if (Validator.isEmpty(data.file)) {
-		errors.name = 'Selecione uma imagem para bandeira do pais'
+		errors.file = 'Selecione uma imagem para bandeira do pais'
 	}
 
 
