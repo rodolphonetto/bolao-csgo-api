@@ -45,28 +45,40 @@ router.post('/add-country', (req, res) => {
 		return res.status(400).json(errors)
 	}
 
-	const name = req.body.name
-	const flag = req.file
+	const countryFields = {}
+	const countryID = req.body.countryID
+	if (req.body.name) countryFields.name = req.body.name
+	if (req.file) countryFields.flag = req.file.filename
 
-	Country.findOne({ name: name })
+	Country.findById(countryID) 
 	.then(country => {
 		if (country) {
-			return res.status(400).json({msg: 'Nome de país já cadastrado'})
+			Country.findOneAndUpdate(
+			{ _id: countryID },
+			{ $set: countryFields },
+			{ new: true }
+			)
+			.then(country => res.json(country))
 		} else {
-			const country = new Country({
-				name: name,
-				flag: flag.filename
-			})
-			country
-			.save()
-			.then(result => {
-				console.log("Pais criado com sucesso")
-			})
-			.catch(err => {
-				console.log(err)
+			Country.findOne({ name: countryFields.name })
+			.then(country => {
+				if (country) {
+					return res.status(400).json({msg: 'Nome de país já cadastrado'})
+				} else {
+					new Country(countryFields)
+					.save()
+					.then(result => {
+						return res.json(result)
+					})
+					.catch(err => {
+						console.log(err)
+					})
+				}
 			})
 		}
 	})
+
+
 })
 
 // Rota devolve pais para edição
@@ -80,40 +92,6 @@ router.get('/edit-country/:countryID', (req, res) => {
 		return res.json(country)
 	  })
 	  .catch(err => console.log(err));
-})
-
-// Rota que edita um pais
-router.put('/edit-country', (req, res) => {
-
-	const { errors, isValid } = validateEditCountry(req.body)
-
-	if (!isValid) {
-		return res.status(400).json(errors)
-	}
-
-	const countryID = req.body.countryID
-	const updatedName = req.body.name
-	const updatedFlag = req.file
-	 
-		Country.findById(countryID)
-		.then(country => {
-			if (!country) {
-				return res.status(404).json({msg: 'Pais não encontrado'})	
-			} else {
-				country.name = updatedName
-				if (updatedFlag) {
-					country.flag = updatedFlag.filename
-				}
-				return country.save()
-				.then(result => {
-					return res.json({msg: 'Pais atualizado com sucesso'})
-				})
-			}
-		})
-		.catch(err => {
-			console.log(err)
-		})
-		
 })
 
 // Rota que deleta um país
