@@ -9,6 +9,9 @@ const isEmpty = require('../validation/is-empty')
 router.get('/', (req, res) => {
 	Country.find()
 	.then(countries => {
+		if (isEmpty(countries)) {
+			return res.status(404).json({msg: 'Nenhum país encontrado'})	 
+		}
 		return res.json(countries)
 	})
 	.catch (err => {
