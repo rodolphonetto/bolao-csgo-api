@@ -1,11 +1,11 @@
 const Validator = require('validator')
 const isEmpty = require('./is-empty')
 
-module.exports = function validateTeam(data) {
+exports.validateTeam = function(data) {
 	let errors = {}
 
 	data.name = !isEmpty(data.name) ? data.name : ''
-	data.file = !isEmpty(data.file) ? data.file : ''
+	data.logo = !isEmpty(data.logo) ? data.logo : ''
 	
 	if (Validator.isEmpty(data.name)) {
 		errors.nameEmpty = 'Nome do time está em branco'
@@ -15,8 +15,8 @@ module.exports = function validateTeam(data) {
 		errors.name = 'Nome do time precisa ter entre 2 e 30 caracteres'
 	}
 
-	if (Validator.isEmpty(data.file)) {
-		errors.file = 'Selecione uma imagem para o logotipo do time'
+	if (Validator.isEmpty(data.logo)) {
+		errors.logo = 'Selecione uma imagem para o logotipo do time'
 	}
 
 
@@ -27,18 +27,13 @@ module.exports = function validateTeam(data) {
 
 }
 
-module.exports = function validaEditTeam(data) {
+exports.validateEditTeam = function(data) {
 	let errors = {}
 
 	data.name = !isEmpty(data.name) ? data.name : ''
-	data.country = !isEmpty(data.country) ? data.country : ''
 	
 	if (Validator.isEmpty(data.name)) {
 		errors.nameEmpty = 'Nome do time está em branco'
-	}
-
-	if (Validator.isEmpty(data.country)) {
-		errors.country = 'Pais do time está em branco'
 	}
 	
 	if (!Validator.isLength(data.name, {min: 2, max: 30})) {

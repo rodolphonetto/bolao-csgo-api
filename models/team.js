@@ -11,7 +11,8 @@ const teamSchema = new Schema({
 		required: true
 	},
 	country: {
-		type: Object,
+		type: Schema.Types.ObjectId,
+		ref: 'Country',
 		required: true
 	}
 })

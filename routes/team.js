@@ -2,8 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Country = require('../models/country')
 const Team = require('../models/team')
-const validateTeam = require('../validation/team')
-const validateEditTeam = require('../validation/team')
+const validators = require('../validation/team')
 const isEmpty = require('../validation/is-empty')
 
 // Retornar times cadastrados
@@ -41,11 +40,6 @@ router.post('/search-team', (req,res) => {
 // Adicionar novo time
 router.post('/add-team', (req, res) => {
 
-	const { errors, isValid } = validateTeam(req.body)
-	if (!isValid) {
-		return res.status(400).json(errors)
-	}
-
 	const teamFields = {}
 	const teamID = req.body.teamID
 	if (req.body.name) teamFields.name = req.body.name
@@ -55,6 +49,12 @@ router.post('/add-team', (req, res) => {
 	Team.findById(teamID) 
 	.then(team => {
 		if (team) {
+			// Validação
+			const { errors, isValid } = validators.validateEditTeam(teamFields)
+			if (!isValid) {
+				return res.status(400).json(errors)
+			}
+			// 
 			Team.findOneAndUpdate(
 				{ _id: teamID },
 				{ $set: teamFields },
@@ -67,6 +67,12 @@ router.post('/add-team', (req, res) => {
 				if (team) {
 					return res.status(400).json({msg: 'Nome de time já cadastrado'})	
 				} else {
+					// Validação
+					const { errors, isValid } = validators.validateTeam(teamFields)
+					if (!isValid) {
+						return res.status(400).json(errors)
+					}
+					// 
 					new Team(teamFields)
 					.save()
 					.then(team =>{
@@ -95,45 +101,6 @@ router.get('/edit-team/:teamID', (req, res) => {
 		return res.json(team)
 	})
 })
-
-// // Rota que edita um time
-// router.put('/edit-team', (req, res) => {
-	
-// 	const { errors, isValid } = validateEditTeam(req.body)
-// 	if (!isValid) {
-// 		return res.status(400).json(errors)
-// 	}
-
-// 	const teamID = req.body.teamID
-// 	const countryID = req.body.country
-// 	const updatedName = req.body.name
-// 	const updatedLogo = req.file
-
-// 	Country.findById(countryID)
-// 	.then(country => {
-// 		if (!country) {
-// 			return res.status(404).json({msg: 'País não encontrado'})
-// 		}
-// 		Team.findById(teamID)
-// 		.then(team => {
-// 			if (!team) {
-// 				return res.status(404).json({msg: 'Time não encontrado'})
-// 			}
-// 			team.country = country
-// 			team.name = updatedName
-// 			if (updatedLogo) {
-// 				team.logo = updatedLogo.filename
-// 			}
-// 		return team.save()
-// 		.then(result => {
-// 			return res.status(404).json(result)
-// 		})
-// 		}) 
-// 	})
-// 	.catch(err => {
-// 		console.log(err)
-// 	})
-// })
 
 // Deletar Time
 router.post('/del-team', (req, res) => {
