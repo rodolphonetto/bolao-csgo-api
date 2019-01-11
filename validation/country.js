@@ -1,11 +1,10 @@
 const Validator = require('validator')
 const isEmpty = require('./is-empty')
 
-module.exports = function validateCountry(data) {
+exports.validateCountry = function (data) {
 	let errors = {}
-
 	data.name = !isEmpty(data.name) ? data.name : ''
-	data.file = !isEmpty(data.file) ? data.file : ''
+	data.flag = !isEmpty(data.flag) ? data.flag : ''
 
 	if (Validator.isEmpty(data.name)) {
 		errors.nameEmpty = 'Nome de pais precisa ser preenchido'
@@ -15,7 +14,7 @@ module.exports = function validateCountry(data) {
 		errors.name = 'Nome do pais precisa ter entre 2 e 30 caracteres'
 	}
 	
-	if (Validator.isEmpty(data.file)) {
+	if (Validator.isEmpty(data.flag)) {
 		errors.file = 'Selecione uma imagem para bandeira do pais'
 	}
 
@@ -26,7 +25,7 @@ module.exports = function validateCountry(data) {
 	}
 }
 
-module.exports = function validateEditCountry(data) {
+exports.validateEditCountry = function (data) {
 	let errors = {}
 
 	data.name = !isEmpty(data.name) ? data.name : ''
@@ -36,7 +35,7 @@ module.exports = function validateEditCountry(data) {
 	}
 	
 	if (Validator.isEmpty(data.name)) {
-		errors.name = 'Nome de pais precisa ser preenchido'
+		errors.nameEmpty = 'Nome de pais precisa ser preenchido'
 	}
 
 	return {

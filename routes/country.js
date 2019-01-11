@@ -1,8 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const Country = require('../models/country')
-const validateCountry = require('../validation/country')
-const validateEditCountry = require('../validation/country')
+const validators = require('../validation/country')
 const isEmpty = require('../validation/is-empty')
 
 // Rota que devolve os paises
@@ -39,32 +38,39 @@ router.post('/search-country', (req,res) => {
 // Rota que adiciona um novo pais
 router.post('/add-country', (req, res) => {
 
-	const { errors, isValid } = validateCountry(req.body)
-
-	if (!isValid) {
-		return res.status(400).json(errors)
-	}
-
 	const countryFields = {}
 	const countryID = req.body.countryID
 	if (req.body.name) countryFields.name = req.body.name
 	if (req.file) countryFields.flag = req.file.filename
 
-	Country.findById(countryID) 
+	Country.findById(countryID)
 	.then(country => {
 		if (country) {
+			// Validação
+			const { errors, isValid } = validators.validateEditCountry(countryFields)
+			if (!isValid) {
+				return res.status(400).json(errors)
+			}
+			// 
 			Country.findOneAndUpdate(
-			{ _id: countryID },
-			{ $set: countryFields },
-			{ new: true }
+				{ _id: countryID },
+				{ $set: countryFields },
+				{ new: true }
 			)
 			.then(country => res.json(country))
+
 		} else {
 			Country.findOne({ name: countryFields.name })
 			.then(country => {
 				if (country) {
 					return res.status(400).json({msg: 'Nome de país já cadastrado'})
 				} else {
+					// Validação
+					const { errors, isValid } = validators.validateCountry(countryFields)
+					if (!isValid) {
+						return res.status(400).json(errors)
+					}
+					// 
 					new Country(countryFields)
 					.save()
 					.then(result => {
@@ -77,8 +83,6 @@ router.post('/add-country', (req, res) => {
 			})
 		}
 	})
-
-
 })
 
 // Rota devolve pais para edição

@@ -47,11 +47,38 @@ router.post('/add-team', (req, res) => {
 	}
 
 	const teamFields = {}
-	const country = req.body.country
+	const teamID = req.body.teamID
 	if (req.body.name) teamFields.name = req.body.name
 	if (req.file) teamFields.logo = req.file.filename
+	if (req.body.country) teamFields.country = req.body.country
 
-	
+	Team.findById(teamID) 
+	.then(team => {
+		if (team) {
+			Team.findOneAndUpdate(
+				{ _id: teamID },
+				{ $set: teamFields },
+				{ new: true }
+			)
+			.then(team => res.json(team))
+		} else {
+			Team.findOne({name: teamFields.name})
+			.then(team => {
+				if (team) {
+					return res.status(400).json({msg: 'Nome de time já cadastrado'})	
+				} else {
+					new Team(teamFields)
+					.save()
+					.then(team =>{
+						return res.json(team)
+					})
+					.catch(err => {
+						console.log(err)
+					})
+				}
+			})
+		}
+	})
 
 
 
