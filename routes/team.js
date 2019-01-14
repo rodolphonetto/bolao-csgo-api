@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const Country = require('../models/country')
 const Team = require('../models/team')
 const validators = require('../validation/team')
 const isEmpty = require('../validation/is-empty')
@@ -37,7 +36,7 @@ router.post('/search-team', (req,res) => {
 })
 
 
-// Adicionar novo time
+// Adicionar/Editar novo time
 router.post('/add-team', (req, res) => {
 
 	const teamFields = {}
@@ -107,11 +106,11 @@ router.post('/del-team', (req, res) => {
 	const teamID = req.body.teamID
 
 	Team.findByIdAndRemove(teamID)
-	.then((team) => {	
+	.then(team => {	
 		if (!team) {
 			return res.status(404).json({msg: 'Time não encontrado'})
 		}
-			return res.json({msg: 'Time excluido com sucesso'})
+		return res.json({msg: 'Time excluido com sucesso'})
 		})
 	.catch(err => {
 		console.log(err)
