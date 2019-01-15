@@ -103,8 +103,11 @@ router.post('/del-player', (req, res) => {
 			return res.status(404).json({msg: 'Player não encontrado'})
 		}
 		fileDelete.deleteFile(player.photo)
-		Player.remove()
-		return res.json({msg: 'Player excluido com sucesso'})
+		Player.remove({ _id: playerID })
+		.then(player => {
+			return res.json({msg: 'Player excluido com sucesso'})
+		})
+		
 	})
 	.catch(err => {
 		console.log(err)
