@@ -36,6 +36,21 @@ router.post('/search-team', (req,res) => {
 	})
 })
 
+// Detalha times
+router.get('/edit-team/:teamID', (req, res) => {
+	const teamID = req.params.teamID
+	Team.findById(teamID)
+	.populate({
+		path: 'players',
+		populate: { path: 'country' }
+	})
+	.then(team => {
+		if (!team) {
+			return res.status(404).json({msg: 'Time não encontrado'})
+		}
+		return res.json(team)
+	})
+})
 
 // Adicionar/Editar novo time
 router.post('/add-team', (req, res) => {

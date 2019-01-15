@@ -8,6 +8,7 @@ const fileDelete = require('../config/file')
 // Retornar players cadastrados
 router.get('/', (req, res) =>{
 	Player.find()
+	.populate('country')
 	.then(players => {
 		if (isEmpty(players)) {
 			return res.status(404).json({msg: 'Nenhum player encontrado'})
@@ -25,6 +26,7 @@ router.post('/search-player', (req, res) => {
 	Player.find({
 		name: new RegExp(playerName, 'i')
 	})
+	.populate('country')
 	.then(players =>{
 		if (isEmpty(players)) {
 			return res.status(404).json({msg: 'Nenhum player encontrado'})
@@ -95,6 +97,7 @@ router.post('/add-player', (req, res) => {
 router.get('/edit-player/:playerID', (req, res) => {
 	const playerID = req.params.playerID
 	Player.findById(playerID)
+	.populate('country')
 	.then(player => {
 		if (!player) {
 			return res.status(404).json({msg: 'Player não encontrado'})

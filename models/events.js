@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-const teamSchema = new Schema({
+const eventoSchema = new Schema({
 	name: {
 		type: String,
 		required: true
@@ -15,12 +15,12 @@ const teamSchema = new Schema({
 		ref: 'Country',
 		required: true
 	},
-	players: [
+	matches: [
 		{
 			type: Schema.Types.ObjectId,
-			ref: 'Player'
+			ref: 'Matches'
 		}
 ]
 })
 
-module.exports = mongoose.model('Team', teamSchema)
+module.exports = mongoose.model('Evento', eventoSchema)
