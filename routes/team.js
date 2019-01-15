@@ -3,6 +3,7 @@ const router = express.Router()
 const Team = require('../models/team')
 const validators = require('../validation/team')
 const isEmpty = require('../validation/is-empty')
+const fileDelete = require('../config/file')
 
 // Retornar times cadastrados
 router.get('/', (req, res) => {
@@ -51,6 +52,7 @@ router.post('/add-team', (req, res) => {
 			// Validação
 			const { errors, isValid } = validators.validateEditTeam(teamFields)
 			if (!isValid) {
+				fileDelete.deleteFile(teamFields.logo)
 				return res.status(400).json(errors)
 			}
 			// 
@@ -59,7 +61,10 @@ router.post('/add-team', (req, res) => {
 				{ $set: teamFields },
 				{ new: true }
 			)
-			.then(team => res.json(team))
+			.then(team => {
+				fileDelete.deleteFile(team.logo)
+				res.json(team)}
+			)
 		} else {
 			Team.findOne({name: teamFields.name})
 			.then(team => {
@@ -69,6 +74,7 @@ router.post('/add-team', (req, res) => {
 					// Validação
 					const { errors, isValid } = validators.validateTeam(teamFields)
 					if (!isValid) {
+						fileDelete.deleteFile(teamFields.logo)
 						return res.status(400).json(errors)
 					}
 					// 
@@ -78,6 +84,7 @@ router.post('/add-team', (req, res) => {
 						return res.json(team)
 					})
 					.catch(err => {
+						fileDelete.deleteFile(teamFields.logo)
 						console.log(err)
 					})
 				}
@@ -105,15 +112,65 @@ router.get('/edit-team/:teamID', (req, res) => {
 router.post('/del-team', (req, res) => {
 	const teamID = req.body.teamID
 
-	Team.findByIdAndRemove(teamID)
+	Team.findById(teamID)
 	.then(team => {	
 		if (!team) {
 			return res.status(404).json({msg: 'Time não encontrado'})
 		}
-		return res.json({msg: 'Time excluido com sucesso'})
+		fileDelete.deleteFile(team.logo)
+		Team.remove({ _id: teamID })
+		.then(team => {
+			return res.json({msg: 'Time excluido com sucesso'})
+		})
 		})
 	.catch(err => {
 		console.log(err)
+	})
+})
+
+// *** Gerenciamento de players *** //
+
+// Adicionar player ao time
+router.post('/add-player', (req, res) => {
+	const teamID = req.body.teamID
+	const playerID = req.body.playerID
+
+	Team.findById(teamID)
+	.then(team => {
+		if (!team || !playerID) {
+			return res.status(404).json({msg: 'Time ou jogador não encontrado'})
+		}
+		team.players.unshift(playerID)
+		team.save()
+		.then(team => {
+			res.json(team)
+		})
+	})
+})
+
+// Remover player ao time
+router.post('/remove-player', (req, res) => {
+	const teamID = req.body.teamID
+	const playerID = req.body.playerID
+
+	Team.findById(teamID)
+	.then(team => {
+		if (!team) {
+			return res.status(404).json({msg: 'Time não encontrado'})
+		}
+		const PlayerIndex = team.players
+		.map(player => player._id.toString())
+		.indexOf(playerID)
+
+		team.players.splice(PlayerIndex, 1)
+
+		team.save()
+		.then(team => {
+			res.json(team)
+		})
+		.catch(err => {
+			console.log(err)
+		})
 	})
 })
 

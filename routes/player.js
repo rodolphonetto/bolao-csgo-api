@@ -47,12 +47,10 @@ router.post('/add-player', (req, res) => {
 	Player.findById(playerID)
 	.then(player => {
 		if (player) {
-			if (playerFields.photo) {
-				fileDelete.deleteFile(player.photo)
-			} 
 		// Validação
 		const { errors, isValid } = validators.validateEditPlayer(playerFields)
 		if (!isValid) {
+			fileDelete.deleteFile(playerFields.photo)
 			return res.status(400).json(errors)
 		}
 		// 
@@ -61,11 +59,19 @@ router.post('/add-player', (req, res) => {
 				{ $set: playerFields },
 				{ new: true },
 			)
-			.then(player => res.json(player))
+			.then(player =>{
+				fileDelete.deleteFile(player.photo)
+				res.json(player)
+			})
+			.catch(err => {
+				fileDelete.deleteFile(playerFields.photo)
+				console.log(err)
+			})
 		} else {
 			// Validação
 			const { errors, isValid } = validators.validatePlayer(playerFields)
 			if (!isValid) {
+				fileDelete.deleteFile(playerFields.photo)
 				return res.status(400).json(errors)
 			}
 			// 		
@@ -73,6 +79,10 @@ router.post('/add-player', (req, res) => {
 			.save()
 			.then(player => {
 				return res.json(player)
+			})
+			.catch(err => {	
+				fileDelete.deleteFile(playerFields.photo)
+				console.log(err)
 			})
 		}
 	})

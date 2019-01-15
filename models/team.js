@@ -16,9 +16,11 @@ const teamSchema = new Schema({
 		required: true
 	},
 	players: [
-		 {
+	{
+		player: {	
 			type: Schema.Types.ObjectId,
 			ref: 'Player'
+		}
 	}
 ]
 })

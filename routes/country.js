@@ -3,6 +3,7 @@ const router = express.Router()
 const Country = require('../models/country')
 const validators = require('../validation/country')
 const isEmpty = require('../validation/is-empty')
+const fileDelete = require('../config/file')
 
 // Rota que devolve os paises
 router.get('/', (req, res) => {
@@ -49,6 +50,7 @@ router.post('/add-country', (req, res) => {
 			// Validação
 			const { errors, isValid } = validators.validateEditCountry(countryFields)
 			if (!isValid) {
+				fileDelete.deleteFile(countryFields.flag)
 				return res.status(400).json(errors)
 			}
 			// 
@@ -57,7 +59,14 @@ router.post('/add-country', (req, res) => {
 				{ $set: countryFields },
 				{ new: true }
 			)
-			.then(country => res.json(country))
+			.then(country => {
+				fileDelete.deleteFile(country.flag)
+				res.json(country)}
+			)
+			.catch(err => {
+				fileDelete.deleteFile(countryFields.flag)
+				console.log(err)
+			})
 
 		} else {
 			Country.findOne({ name: countryFields.name })
@@ -68,6 +77,7 @@ router.post('/add-country', (req, res) => {
 					// Validação
 					const { errors, isValid } = validators.validateCountry(countryFields)
 					if (!isValid) {
+						fileDelete.deleteFile(countryFields.flag)
 						return res.status(400).json(errors)
 					}
 					// 
@@ -77,6 +87,7 @@ router.post('/add-country', (req, res) => {
 						return res.json(result)
 					})
 					.catch(err => {
+						fileDelete.deleteFile(countryFields.flag)
 						console.log(err)
 					})
 				}
@@ -101,14 +112,18 @@ router.get('/edit-country/:countryID', (req, res) => {
 // Rota que deleta um país
 router.post('/del-country', (req, res) => {
 	const countryID = req.body.countryID
-	Country.findByIdAndRemove(countryID)
+	Country.findById(countryID)
 	.then((country) => {
 		if (!country) {
 			return res.status(404).json({msg: 'Pais não encontrado'})	 
 		}
-		return res.json({msg: 'Pais excluido com sucesso'})
+		fileDelete.deleteFile(country.flag)
+		Country.remove({ _id: countryID })
+		.then(country => {
+			return res.json({msg: 'Pais excluido com sucesso'})
+		})
 	})
-	.catch (err => {
+	.catch(err => {
 		console.log(err)
 	})
 })
