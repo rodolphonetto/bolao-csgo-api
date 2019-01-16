@@ -6,6 +6,52 @@ const isEmpty = require('../validation/is-empty')
 const validators = require('../validation/events')
 const fileDelete = require('../config/file')
 
+// Retornar eventos cadastrados
+router.get('/', (req, res) =>{
+	Evento.find()
+	.populate('country')
+	.then(events => {
+		if (isEmpty(events)) {
+			return res.status(404).json({msg: 'Nenhum evento encontrado'})
+		}
+		return res.json(events)
+	})
+	.catch(err => {
+		console.log(err)
+	})
+})
+
+// Pesquisa de eventos
+router.post('/search-event', (req, res) => {
+	const eventName = req.body.name
+	Evento.find({
+		name: new RegExp(eventName, 'i')
+	})
+	.populate('country')
+	.then(events => {
+		if (isEmpty(events)) {
+			return res.status(404).json({msg: 'Nenhum evento encontrado'})
+		}
+		return res.json(events)
+	})
+	.catch(err => {
+		console.log(err)
+	})
+})
+
+// Devolver evento para edição
+router.get('/edit-event/:eventoID', (req, res) => {
+	const eventoID = req.params.eventoID
+	Evento.findById(eventoID)
+	.populate('country')
+	.then(evento => {
+		if (!evento) {
+			return res.status(404).json({msg: 'Evento não encontrado'})
+		}
+		return res.json(evento)
+	})
+})
+
 // Adicionar/editar novo evento
 router.post('/add-event', (req, res) => {
 	const eventFields = {}
@@ -55,6 +101,27 @@ router.post('/add-event', (req, res) => {
 				console.log(err)
 			})
 		}
+	})
+	.catch(err => {
+		console.log(err)
+	})
+})
+
+// Deletar evento
+router.post('/del-event', (req, res) => {
+	const eventID = req.body.eventID
+
+	Evento.findById(eventID)
+	.then(event => {
+		if (!event) {
+			return res.status(404).json({msg: 'Evento não encontrado'})
+		}
+		fileDelete.deleteFile(event.logo)
+		event.remove({ _id: eventID })
+		.then(event => {
+			return res.json({msg: 'Evento excluido com sucesso'})
+		})
+		
 	})
 	.catch(err => {
 		console.log(err)

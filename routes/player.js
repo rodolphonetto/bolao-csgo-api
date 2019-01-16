@@ -27,7 +27,7 @@ router.post('/search-player', (req, res) => {
 		name: new RegExp(playerName, 'i')
 	})
 	.populate('country')
-	.then(players =>{
+	.then(players => {
 		if (isEmpty(players)) {
 			return res.status(404).json({msg: 'Nenhum player encontrado'})
 		}

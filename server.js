@@ -8,6 +8,8 @@ const country = require('./routes/country')
 const team = require('./routes/team')
 const player = require('./routes/player')
 const event = require('./routes/event')
+const match = require('./routes/match')
+const map = require('./routes/map')
 
 const app = express()
 const db = require('./config/keys').mongoURI
@@ -44,6 +46,8 @@ app.use('/countries', country)
 app.use('/teams', team)
 app.use('/players', player)
 app.use('/events', event)
+app.use('/matches', match)
+app.use('/matches', map)
 
 const port = process.env.PORT || 5000
 
