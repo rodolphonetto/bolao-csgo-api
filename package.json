@@ -21,6 +21,11 @@
     "validator": "^10.10.0"
   },
   "devDependencies": {
+    "eslint": "^5.12.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.12.4",
     "nodemon": "^1.18.9"
   }
 }
