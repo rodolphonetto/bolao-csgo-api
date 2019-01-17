@@ -7,51 +7,29 @@ const matchSchema = new Schema({
     type: String,
     required: true,
   },
-
   teamA: {
     type: Schema.Types.ObjectId,
     ref: 'Team',
     required: true,
   },
-
+  resultA: {
+    type: Number,
+    required: true,
+  },
   teamB: {
     type: Schema.Types.ObjectId,
     ref: 'Team',
     required: true,
   },
-
+  resultB: {
+    type: Number,
+    required: true,
+  },
   event: {
     type: Schema.Types.ObjectId,
     ref: 'Evento',
     required: true,
   },
-
-  maps: [
-    {
-      teamRA: {
-        team: {
-          type: Schema.Types.ObjectId,
-          ref: 'Team',
-          required: true,
-        },
-        result: {
-          type: Number,
-          required: true,
-        },
-      },
-      teamRB: {
-        team: {
-          type: Schema.Types.ObjectId,
-          ref: 'Team',
-          required: true,
-        },
-        result: {
-          type: Number,
-          required: true,
-        },
-      },
-    },
-  ],
 });
 
 module.exports = mongoose.model('Match', matchSchema);
