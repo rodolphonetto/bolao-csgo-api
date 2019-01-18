@@ -9,6 +9,7 @@ const team = require('./routes/team');
 const player = require('./routes/player');
 const event = require('./routes/event');
 const match = require('./routes/match');
+const auth = require('./routes/auth');
 
 const app = express();
 const db = require('./config/keys').mongoURI;
@@ -49,6 +50,7 @@ app.use('/teams', team);
 app.use('/players', player);
 app.use('/events', event);
 app.use('/matches', match);
+app.use('/auth', auth);
 
 const port = process.env.PORT || 5000;
 

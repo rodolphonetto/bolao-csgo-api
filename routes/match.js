@@ -19,7 +19,6 @@ router.get('/', (req, res) => {
     });
 });
 
-// TODO inventar pesquisa por time dentro do campeonato
 // Pesquisa de partidas
 router.post('/search-match', (req, res) => {
   const matchName = req.body.matchName;
@@ -58,6 +57,8 @@ router.post('/add-match', (req, res) => {
   if (req.body.resultB) matchFields.resultB = req.body.resultB;
   if (req.body.teamB) matchFields.teamB = req.body.teamB;
   if (req.body.event) matchFields.event = req.body.event;
+  if (req.body.open === 1) matchFields.open = false;
+  if (req.body.finished === 1) matchFields.finished = true;
 
   Match.findById(matchID)
     .then((match) => {

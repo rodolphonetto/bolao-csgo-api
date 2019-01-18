@@ -38,7 +38,6 @@ exports.validateMatch = function (data) {
   };
 };
 
-
 exports.validateEditMatch = function (data) {
   const errors = {};
 

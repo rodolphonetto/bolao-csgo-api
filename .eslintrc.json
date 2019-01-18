@@ -17,6 +17,7 @@
     "no-shadow": "off",
     "consistent-return": "off",
     "func-names": "off",
+    "linebreak-style": "off",
     "import/prefer-default-export": "off",
     "no-unused-expressions": ["error", { "allowTaggedTemplates": true }]
   }

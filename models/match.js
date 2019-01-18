@@ -30,6 +30,14 @@ const matchSchema = new Schema({
     ref: 'Evento',
     required: true,
   },
+  open: {
+    type: Boolean,
+    default: true,
+  },
+  finished: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model('Match', matchSchema);
