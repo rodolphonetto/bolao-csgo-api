@@ -1,10 +1,41 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 const User = require('../models/user');
 const validators = require('../validation/user');
 const isEmpty = require('../validation/is-empty');
+
+// Login
+router.post('/login', (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  let loadedUser
+  User.findOne({ username: username })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ msg: 'Usuario não encontrado' })
+      }
+      loadedUser = user
+      return bcrypt.compare(password, user.password)
+    })
+    .then(isEqual => {
+      if (!isEqual) {
+        return res.status(401).json({ msg: 'Senha incorreta' })
+      }
+      const token = jwt.sign(
+        {
+          email: loadedUser.email,
+          username: loadedUser.username,
+          userid: loadedUser._id.toString()
+        },
+        '!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#',
+        { expiresIn: '1h' }
+      )
+      res.status(200).json({ token: token })
+    })
+})
 
 // Adicionar novo usuario
 router.post('/signup', (req, res) => {

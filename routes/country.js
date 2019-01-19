@@ -1,5 +1,5 @@
 const express = require('express');
-
+const isAuth = require('../config/is-auth');
 const router = express.Router();
 const Country = require('../models/country');
 const validators = require('../validation/country');
@@ -7,7 +7,7 @@ const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
 // Rota que devolve os paises
-router.get('/', (req, res) => {
+router.get('/', isAuth, (req, res) => {
   Country.find()
     .then((countries) => {
       if (isEmpty(countries)) {
