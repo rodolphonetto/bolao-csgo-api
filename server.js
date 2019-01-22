@@ -9,6 +9,7 @@ const team = require('./routes/team');
 const player = require('./routes/player');
 const event = require('./routes/event');
 const match = require('./routes/match');
+const bet = require('./routes/bet');
 const auth = require('./routes/auth');
 
 const app = express();
@@ -30,9 +31,9 @@ const fileStorage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimetype === 'image/png'
-    || file.mimetype === 'image/jpg'
-    || file.mimetype === 'image/jpeg'
+    file.mimetype === 'image/png' ||
+    file.mimetype === 'image/jpg' ||
+    file.mimetype === 'image/jpeg'
   ) {
     cb(null, true);
   } else {
@@ -50,6 +51,7 @@ app.use('/teams', team);
 app.use('/players', player);
 app.use('/events', event);
 app.use('/matches', match);
+app.use('/bets', bet);
 app.use('/auth', auth);
 
 const port = process.env.PORT || 5000;

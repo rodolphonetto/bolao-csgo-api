@@ -8,13 +8,13 @@ const isEmpty = require('../validation/is-empty');
 // Retornar partidas cadastrados
 router.get('/', (req, res) => {
   Match.find()
-    .then((matches) => {
+    .then(matches => {
       if (isEmpty(matches)) {
         return res.status(404).json({ msg: 'Nenhum time encontrado' });
       }
       return res.json(matches);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -25,13 +25,13 @@ router.post('/search-match', (req, res) => {
   Match.find({
     name: new RegExp(matchName, 'i'),
   })
-    .then((matches) => {
+    .then(matches => {
       if (isEmpty(matches)) {
         return res.status(404).json({ msg: 'Nenhum time encontrado' });
       }
       return res.json(matches);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -39,7 +39,7 @@ router.post('/search-match', (req, res) => {
 // Devolver partida para edição
 router.get('/edit-match/:matchID', (req, res) => {
   const match = req.params.matchID;
-  Match.findById(match).then((match) => {
+  Match.findById(match).then(match => {
     if (!match) {
       return res.status(404).json({ msg: 'Partida não encontrada' });
     }
@@ -61,7 +61,7 @@ router.post('/add-match', (req, res) => {
   if (req.body.finished === 1) matchFields.finished = true;
 
   Match.findById(matchID)
-    .then((match) => {
+    .then(match => {
       if (match) {
         // Validação
         const { errors, isValid } = validators.validateEditMatch(matchFields);
@@ -70,10 +70,10 @@ router.post('/add-match', (req, res) => {
         }
         //
         Match.findOneAndUpdate({ _id: matchID }, { $set: matchFields }, { new: true })
-          .then((match) => {
+          .then(match => {
             res.json(match);
           })
-          .catch((err) => {
+          .catch(err => {
             console.log(err);
           });
       } else {
@@ -86,12 +86,12 @@ router.post('/add-match', (req, res) => {
         new Match(matchFields)
           .save()
           .then(match => res.json(match))
-          .catch((err) => {
+          .catch(err => {
             console.log(err);
           });
       }
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -101,13 +101,13 @@ router.post('/del-match', (req, res) => {
   const matchID = req.body.matchID;
 
   Match.findById(matchID)
-    .then((match) => {
+    .then(match => {
       if (!match) {
         return res.status(404).json({ msg: 'Partida não encontrada' });
       }
       match.remove({ _id: matchID }).then(() => res.json({ msg: 'Partida excluida com sucesso' }));
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });

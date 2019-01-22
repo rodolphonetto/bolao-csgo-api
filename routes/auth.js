@@ -11,31 +11,31 @@ const isEmpty = require('../validation/is-empty');
 router.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  let loadedUser
+  let loadedUser;
   User.findOne({ username: username })
     .then(user => {
       if (!user) {
-        return res.status(404).json({ msg: 'Usuario não encontrado' })
+        return res.status(404).json({ msg: 'Usuario não encontrado' });
       }
-      loadedUser = user
-      return bcrypt.compare(password, user.password)
+      loadedUser = user;
+      return bcrypt.compare(password, user.password);
     })
     .then(isEqual => {
       if (!isEqual) {
-        return res.status(401).json({ msg: 'Senha incorreta' })
+        return res.status(401).json({ msg: 'Senha incorreta' });
       }
       const token = jwt.sign(
         {
           email: loadedUser.email,
           username: loadedUser.username,
-          userid: loadedUser._id.toString()
+          userid: loadedUser._id.toString(),
         },
         '!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#',
-        { expiresIn: '1h' }
-      )
-      res.status(200).json({ token: token })
-    })
-})
+        { expiresIn: '1h' },
+      );
+      res.status(200).json({ token: token });
+    });
+});
 
 // Adicionar novo usuario
 router.post('/signup', (req, res) => {
@@ -47,9 +47,9 @@ router.post('/signup', (req, res) => {
 
   bcrypt
     .hash(pass, 12)
-    .then((hashedPass) => {
+    .then(hashedPass => {
       userFields.password = hashedPass;
-      User.findOne({ email: userFields.email, username: userFields.username }).then((user) => {
+      User.findOne({ email: userFields.email, username: userFields.username }).then(user => {
         if (user) {
           return res.json({ msg: 'Email ou nome de usuario já está cadastrado' });
         }
@@ -62,7 +62,7 @@ router.post('/signup', (req, res) => {
         new User(userFields)
           .save()
           .then(() => res.json({ msg: 'Usuario cadastrado com sucesso' }))
-          .catch((err) => {
+          .catch(err => {
             console.log(err);
           });
       });
@@ -75,13 +75,13 @@ router.post('/del-user', (req, res) => {
   const userID = req.body.userID;
 
   User.findById(userID)
-    .then((user) => {
+    .then(user => {
       if (!user) {
         return res.status(404).json({ msg: 'Usuario não encontrado' });
       }
       User.remove({ _id: userID }).then(() => res.json({ msg: 'Usuario excluido com sucesso' }));
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
