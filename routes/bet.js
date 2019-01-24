@@ -11,13 +11,13 @@ router.get('/', (req, res) => {
   Bet.find()
     .populate('match')
     .populate('user')
-    .then(bets => {
+    .then((bets) => {
       if (isEmpty(bets)) {
         return res.status(404).json({ msg: 'Nenhuma aposta encontrada' });
       }
       return res.json(bets);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -29,7 +29,7 @@ router.get('/edit-bet/:betID', (req, res) => {
   Bet.findById(betID)
     .populate('match')
     .populate('user')
-    .then(bet => {
+    .then((bet) => {
       if (!bet) {
         return res.status(404).json({ msg: 'Aposta não encontrada' });
       }
@@ -49,7 +49,7 @@ router.post('/add-bet', (req, res) => {
   if (req.body.userID) betFields.user = req.body.userID;
 
   Bet.findById(betID)
-    .then(bet => {
+    .then((bet) => {
       if (bet) {
         // Validação
         const { errors, isValid } = validators.validateEditBet(betFields);
@@ -58,10 +58,10 @@ router.post('/add-bet', (req, res) => {
         }
         //
         Bet.findOneAndUpdate({ _id: betID }, { $set: betFields }, { new: true })
-          .then(bet => {
+          .then((bet) => {
             res.json(bet);
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
       } else {
@@ -74,12 +74,12 @@ router.post('/add-bet', (req, res) => {
         new Bet(betFields)
           .save()
           .then(bet => res.json(bet))
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -89,13 +89,13 @@ router.post('/del-bet', (req, res) => {
   const betID = req.body.betID;
 
   Bet.findById(betID)
-    .then(bet => {
+    .then((bet) => {
       if (!bet) {
         return res.status(404).json({ msg: 'Aposta não encontrada' });
       }
       Bet.remove({ _id: betID }).then(bet => res.json({ msg: 'Aposta excluida com sucesso' }));
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });

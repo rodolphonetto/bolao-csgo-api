@@ -10,13 +10,13 @@ const fileDelete = require('../config/file');
 router.get('/', (req, res) => {
   Evento.find()
     .populate('country')
-    .then(events => {
+    .then((events) => {
       if (isEmpty(events)) {
         return res.status(404).json({ msg: 'Nenhum evento encontrado' });
       }
       return res.json(events);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -28,13 +28,13 @@ router.post('/search-event', (req, res) => {
     name: new RegExp(eventName, 'i'),
   })
     .populate('country')
-    .then(events => {
+    .then((events) => {
       if (isEmpty(events)) {
         return res.status(404).json({ msg: 'Nenhum evento encontrado' });
       }
       return res.json(events);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -44,7 +44,7 @@ router.get('/edit-event/:eventoID', (req, res) => {
   const eventoID = req.params.eventoID;
   Evento.findById(eventoID)
     .populate('country')
-    .then(evento => {
+    .then((evento) => {
       if (!evento) {
         return res.status(404).json({ msg: 'Evento não encontrado' });
       }
@@ -61,7 +61,7 @@ router.post('/add-event', (req, res) => {
   if (req.body.country) eventFields.country = req.body.country;
 
   Evento.findById(eventID)
-    .then(event => {
+    .then((event) => {
       if (event) {
         // Validação
         const { errors, isValid } = validators.validateEditEvent(eventFields);
@@ -71,11 +71,11 @@ router.post('/add-event', (req, res) => {
         }
         //
         Evento.findOneAndUpdate({ _id: eventID }, { $set: eventFields }, { new: true })
-          .then(event => {
+          .then((event) => {
             fileDelete.deleteFile(event.logo);
             res.json(event);
           })
-          .catch(err => {
+          .catch((err) => {
             fileDelete.deleteFile(eventFields.logo);
             console.log(err);
           });
@@ -90,13 +90,13 @@ router.post('/add-event', (req, res) => {
         new Evento(eventFields)
           .save()
           .then(event => res.json(event))
-          .catch(err => {
+          .catch((err) => {
             fileDelete.deleteFile(eventFields.logo);
             console.log(err);
           });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -106,7 +106,7 @@ router.post('/del-event', (req, res) => {
   const eventID = req.body.eventID;
 
   Evento.findById(eventID)
-    .then(event => {
+    .then((event) => {
       if (!event) {
         return res.status(404).json({ msg: 'Evento não encontrado' });
       }
@@ -115,7 +115,7 @@ router.post('/del-event', (req, res) => {
         .remove({ _id: eventID })
         .then(() => res.json({ msg: 'Evento excluido com sucesso' }));
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });

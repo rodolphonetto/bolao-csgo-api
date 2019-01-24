@@ -10,13 +10,13 @@ const fileDelete = require('../config/file');
 router.get('/', (req, res) => {
   Player.find()
     .populate('country')
-    .then(players => {
+    .then((players) => {
       if (isEmpty(players)) {
         return res.status(404).json({ msg: 'Nenhum player encontrado' });
       }
       return res.json(players);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -28,13 +28,13 @@ router.post('/search-player', (req, res) => {
     name: new RegExp(playerName, 'i'),
   })
     .populate('country')
-    .then(players => {
+    .then((players) => {
       if (isEmpty(players)) {
         return res.status(404).json({ msg: 'Nenhum player encontrado' });
       }
       return res.json(players);
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -48,7 +48,7 @@ router.post('/add-player', (req, res) => {
   if (req.body.country) playerFields.country = req.body.country;
 
   Player.findById(playerID)
-    .then(player => {
+    .then((player) => {
       if (player) {
         // Validação
         const { errors, isValid } = validators.validateEditPlayer(playerFields);
@@ -58,11 +58,11 @@ router.post('/add-player', (req, res) => {
         }
         //
         Player.findOneAndUpdate({ _id: playerID }, { $set: playerFields }, { new: true })
-          .then(player => {
+          .then((player) => {
             fileDelete.deleteFile(player.photo);
             res.json(player);
           })
-          .catch(err => {
+          .catch((err) => {
             fileDelete.deleteFile(playerFields.photo);
             console.log(err);
           });
@@ -77,13 +77,13 @@ router.post('/add-player', (req, res) => {
         new Player(playerFields)
           .save()
           .then(player => res.json(player))
-          .catch(err => {
+          .catch((err) => {
             fileDelete.deleteFile(playerFields.photo);
             console.log(err);
           });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
@@ -93,7 +93,7 @@ router.get('/edit-player/:playerID', (req, res) => {
   const playerID = req.params.playerID;
   Player.findById(playerID)
     .populate('country')
-    .then(player => {
+    .then((player) => {
       if (!player) {
         return res.status(404).json({ msg: 'Player não encontrado' });
       }
@@ -106,14 +106,14 @@ router.post('/del-player', (req, res) => {
   const playerID = req.body.playerID;
 
   Player.findById(playerID)
-    .then(player => {
+    .then((player) => {
       if (!player) {
         return res.status(404).json({ msg: 'Player não encontrado' });
       }
       fileDelete.deleteFile(player.photo);
       Player.remove({ _id: playerID }).then(() => res.json({ msg: 'Player excluido com sucesso' }));
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
     });
 });
