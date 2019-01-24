@@ -9,13 +9,13 @@ const fileDelete = require('../config/file');
 // Retornar times cadastrados
 router.get('/', (req, res) => {
   Team.find()
-    .then((teams) => {
+    .then(teams => {
       if (isEmpty(teams)) {
         return res.status(404).json({ msg: 'Nenhum time encontrado' });
       }
       return res.json(teams);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -26,13 +26,13 @@ router.post('/search-team', (req, res) => {
   Team.find({
     name: new RegExp(teamName, 'i'),
   })
-    .then((teams) => {
+    .then(teams => {
       if (isEmpty(teams)) {
         return res.status(404).json({ msg: 'Nenhum time encontrado' });
       }
       return res.json(teams);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -45,7 +45,7 @@ router.get('/edit-team/:teamID', (req, res) => {
       path: 'players',
       populate: { path: 'country' },
     })
-    .then((team) => {
+    .then(team => {
       if (!team) {
         return res.status(404).json({ msg: 'Time não encontrado' });
       }
@@ -61,7 +61,7 @@ router.post('/add-team', (req, res) => {
   if (req.file) teamFields.logo = req.file.filename;
   if (req.body.country) teamFields.country = req.body.country;
 
-  Team.findById(teamID).then((team) => {
+  Team.findById(teamID).then(team => {
     if (team) {
       // Validação
       const { errors, isValid } = validators.validateEditTeam(teamFields);
@@ -70,12 +70,12 @@ router.post('/add-team', (req, res) => {
         return res.status(400).json(errors);
       }
       //
-      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true }).then((team) => {
+      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true }).then(team => {
         fileDelete.deleteFile(team.logo);
         res.json(team);
       });
     } else {
-      Team.findOne({ name: teamFields.name }).then((team) => {
+      Team.findOne({ name: teamFields.name }).then(team => {
         if (team) {
           return res.status(400).json({ msg: 'Nome de time já cadastrado' });
         }
@@ -89,7 +89,7 @@ router.post('/add-team', (req, res) => {
         new Team(teamFields)
           .save()
           .then(team => res.json(team))
-          .catch((err) => {
+          .catch(err => {
             fileDelete.deleteFile(teamFields.logo);
             console.log(err);
           });
@@ -101,7 +101,7 @@ router.post('/add-team', (req, res) => {
 // Devolver time para edição
 router.get('/edit-team/:teamID', (req, res) => {
   const teamID = req.params.teamID;
-  Team.findById(teamID).then((team) => {
+  Team.findById(teamID).then(team => {
     if (!team) {
       return res.status(404).json({ msg: 'Time não encontrado' });
     }
@@ -114,14 +114,14 @@ router.post('/del-team', (req, res) => {
   const teamID = req.body.teamID;
 
   Team.findById(teamID)
-    .then((team) => {
+    .then(team => {
       if (!team) {
         return res.status(404).json({ msg: 'Time não encontrado' });
       }
       fileDelete.deleteFile(team.logo);
       Team.remove({ _id: teamID }).then(team => res.json({ msg: 'Time excluido com sucesso' }));
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -133,12 +133,12 @@ router.post('/add-player', (req, res) => {
   const teamID = req.body.teamID;
   const playerID = req.body.playerID;
 
-  Team.findById(teamID).then((team) => {
+  Team.findById(teamID).then(team => {
     if (!team || !playerID) {
       return res.status(404).json({ msg: 'Time ou jogador não encontrado' });
     }
     team.players.unshift(playerID);
-    team.save().then((team) => {
+    team.save().then(team => {
       res.json(team);
     });
   });
@@ -149,7 +149,7 @@ router.post('/remove-player', (req, res) => {
   const teamID = req.body.teamID;
   const playerID = req.body.playerID;
 
-  Team.findById(teamID).then((team) => {
+  Team.findById(teamID).then(team => {
     if (!team) {
       return res.status(404).json({ msg: 'Time não encontrado' });
     }
@@ -159,10 +159,10 @@ router.post('/remove-player', (req, res) => {
 
     team
       .save()
-      .then((team) => {
+      .then(team => {
         res.json(team);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
       });
   });

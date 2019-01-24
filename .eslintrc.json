@@ -19,6 +19,7 @@
     "func-names": "off",
     "linebreak-style": "off",
     "import/prefer-default-export": "off",
+    "arrow-parens": "off",
     "no-unused-expressions": ["error", { "allowTaggedTemplates": true }]
   }
 }

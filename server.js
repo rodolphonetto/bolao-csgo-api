@@ -46,6 +46,13 @@ app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, filefilter: fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  next();
+});
+
 app.use('/countries', country);
 app.use('/teams', team);
 app.use('/players', player);
@@ -54,6 +61,6 @@ app.use('/matches', match);
 app.use('/bets', bet);
 app.use('/auth', auth);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));

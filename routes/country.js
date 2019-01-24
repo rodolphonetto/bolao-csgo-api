@@ -9,13 +9,13 @@ const fileDelete = require('../config/file');
 // Rota que devolve os paises
 router.get('/', isAuth, (req, res) => {
   Country.find()
-    .then((countries) => {
+    .then(countries => {
       if (isEmpty(countries)) {
         return res.status(404).json({ msg: 'Nenhum país encontrado' });
       }
       return res.json(countries);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -26,13 +26,13 @@ router.post('/search-country', (req, res) => {
   Country.find({
     name: new RegExp(countryName, 'i'),
   })
-    .then((countries) => {
+    .then(countries => {
       if (isEmpty(countries)) {
         return res.status(404).json({ msg: 'Nenhum país encontrado' });
       }
       return res.json(countries);
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
@@ -44,7 +44,7 @@ router.post('/add-country', (req, res) => {
   if (req.body.name) countryFields.name = req.body.name;
   if (req.file) countryFields.flag = req.file.filename;
 
-  Country.findById(countryID).then((country) => {
+  Country.findById(countryID).then(country => {
     if (country) {
       // Validação
       const { errors, isValid } = validators.validateEditCountry(countryFields);
@@ -54,16 +54,16 @@ router.post('/add-country', (req, res) => {
       }
       //
       Country.findOneAndUpdate({ _id: countryID }, { $set: countryFields }, { new: true })
-        .then((country) => {
+        .then(country => {
           fileDelete.deleteFile(country.flag);
           res.json(country);
         })
-        .catch((err) => {
+        .catch(err => {
           fileDelete.deleteFile(countryFields.flag);
           console.log(err);
         });
     } else {
-      Country.findOne({ name: countryFields.name }).then((country) => {
+      Country.findOne({ name: countryFields.name }).then(country => {
         if (country) {
           return res.status(400).json({ msg: 'Nome de país já cadastrado' });
         }
@@ -77,7 +77,7 @@ router.post('/add-country', (req, res) => {
         new Country(countryFields)
           .save()
           .then(result => res.json(result))
-          .catch((err) => {
+          .catch(err => {
             fileDelete.deleteFile(countryFields.flag);
             console.log(err);
           });
@@ -90,7 +90,7 @@ router.post('/add-country', (req, res) => {
 router.get('/edit-country/:countryID', (req, res) => {
   const countryID = req.params.countryID;
   Country.findById(countryID)
-    .then((country) => {
+    .then(country => {
       if (!country) {
         return res.status(404).json({ msg: 'Pais não encontrado' });
       }
@@ -103,14 +103,14 @@ router.get('/edit-country/:countryID', (req, res) => {
 router.post('/del-country', (req, res) => {
   const countryID = req.body.countryID;
   Country.findById(countryID)
-    .then((country) => {
+    .then(country => {
       if (!country) {
         return res.status(404).json({ msg: 'Pais não encontrado' });
       }
       fileDelete.deleteFile(country.flag);
       Country.remove({ _id: countryID }).then(() => res.json({ msg: 'Pais excluido com sucesso' }));
     })
-    .catch((err) => {
+    .catch(err => {
       console.log(err);
     });
 });
