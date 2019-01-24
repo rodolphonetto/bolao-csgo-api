@@ -15,6 +15,9 @@
     ],
     "global-require": "off",
     "import/prefer-default-export": "off",
+    "func-names": "off",
+    "linebreak-style": "off",
+    "prefer-destructuring": "off",
     "no-unused-expressions": ["error", { "allowTaggedTemplates": true }]
   }
 }

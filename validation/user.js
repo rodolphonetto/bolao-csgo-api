@@ -20,7 +20,6 @@ exports.validateUser = function (data, pass, pass2) {
     errors.password = 'O campo senha e confirmação precisam ser iguais.';
   }
 
-
   if (!Validator.isEmail(data.email)) {
     errors.email = 'Use um email valido';
   }
