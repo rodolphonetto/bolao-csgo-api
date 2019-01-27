@@ -60,7 +60,7 @@ router.post('/signup', (req, res) => {
         }
         new User(userFields)
           .save()
-          .then(() => res.json({ msg: 'Usuario cadastrado com sucesso' }))
+          .then(() => res.json({ msg: 'Usuario cadastrado com sucesso!!' }))
           .catch((err) => {
             console.log(err);
           });
