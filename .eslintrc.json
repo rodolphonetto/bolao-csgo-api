@@ -18,6 +18,8 @@
     "func-names": "off",
     "linebreak-style": "off",
     "prefer-destructuring": "off",
+    "consistent-return": "off",
+    "no-underscore-dangle": "off",
     "no-unused-expressions": ["error", { "allowTaggedTemplates": true }]
   }
 }

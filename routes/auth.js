@@ -14,14 +14,14 @@ router.post('/login', (req, res) => {
   User.findOne({ username })
     .then((user) => {
       if (!user) {
-        return res.status(404).json({ msg: 'Usuario não encontrado' });
+        return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
       }
       loadedUser = user;
       return bcrypt.compare(password, user.password);
     })
     .then((isEqual) => {
       if (!isEqual) {
-        return res.status(401).json({ msg: 'Senha incorreta' });
+        return res.status(401).json({ wrongPassword: 'Senha incorreta' });
       }
       const token = jwt.sign(
         {
@@ -33,7 +33,8 @@ router.post('/login', (req, res) => {
         { expiresIn: '1h' },
       );
       res.status(200).json({ token });
-    });
+    })
+    .catch(err => console.log(err));
 });
 
 // Adicionar novo usuario
