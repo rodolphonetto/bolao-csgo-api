@@ -7,6 +7,8 @@ const validators = require('../validation/country');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
+let oldImage;
+
 // Rota que devolve os paises
 router.get('/', isAuth, (req, res) => {
   Country.find()
@@ -22,7 +24,7 @@ router.get('/', isAuth, (req, res) => {
 });
 
 // Função busca de países
-router.post('/search-country', (req, res) => {
+router.post('/search-country', isAuth, (req, res) => {
   const countryName = req.body.countryName;
   Country.find({
     name: new RegExp(countryName, 'i'),
@@ -39,7 +41,7 @@ router.post('/search-country', (req, res) => {
 });
 
 // Rota que adiciona um novo pais
-router.post('/add-country', (req, res) => {
+router.post('/add-country', isAuth, (req, res) => {
   const countryFields = {};
   const countryID = req.body.countryID;
   if (req.body.name) countryFields.name = req.body.name;
@@ -47,16 +49,21 @@ router.post('/add-country', (req, res) => {
 
   Country.findById(countryID).then((country) => {
     if (country) {
+      oldImage = country.flag;
       // Validação
       const { errors, isValid } = validators.validateEditCountry(countryFields);
       if (!isValid) {
-        fileDelete.deleteFile(countryFields.flag);
+        if (countryFields.flag) {
+          fileDelete.deleteFile(countryFields.flag);
+        }
         return res.status(400).json(errors);
       }
       //
       Country.findOneAndUpdate({ _id: countryID }, { $set: countryFields }, { new: true })
         .then((country) => {
-          fileDelete.deleteFile(country.flag);
+          if (countryFields.flag) {
+            fileDelete.deleteFile(oldImage);
+          }
           res.json(country);
         })
         .catch((err) => {
@@ -88,7 +95,7 @@ router.post('/add-country', (req, res) => {
 });
 
 // Rota devolve pais para edição
-router.get('/edit-country/:countryID', (req, res) => {
+router.get('/edit-country/:countryID', isAuth, (req, res) => {
   const countryID = req.params.countryID;
   Country.findById(countryID)
     .then((country) => {
@@ -101,8 +108,8 @@ router.get('/edit-country/:countryID', (req, res) => {
 });
 
 // Rota que deleta um país
-router.post('/del-country', (req, res) => {
-  const countryID = req.body.countryID;
+router.get('/del-country/:countryID', isAuth, (req, res) => {
+  const countryID = req.params.countryID;
   Country.findById(countryID)
     .then((country) => {
       if (!country) {

@@ -20,6 +20,13 @@ mongoose
   .then(console.log('MongoDB conectado'))
   .catch(err => console.log(err));
 
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*, Content-Type, Authorization');
+  next();
+});
+
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'images');
@@ -31,9 +38,9 @@ const fileStorage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (
-    file.mimetype === 'image/png' ||
-    file.mimetype === 'image/jpg' ||
-    file.mimetype === 'image/jpeg'
+    file.mimetype === 'image/png'
+    || file.mimetype === 'image/jpg'
+    || file.mimetype === 'image/jpeg'
   ) {
     cb(null, true);
   } else {
@@ -45,13 +52,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, filefilter: fileFilter }).single('image'));
 app.use('/images', express.static(path.join(__dirname, 'images')));
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
-  next();
-});
 
 app.use('/countries', country);
 app.use('/teams', team);

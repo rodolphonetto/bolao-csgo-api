@@ -57,8 +57,9 @@ router.post('/add-player', (req, res) => {
           return res.status(400).json(errors);
         }
         //
-        Player.findOneAndUpdate({ _id: playerID }, { $set: playerFields }, { new: true })
+        Player.findOneAndUpdate({ _id: playerID }, { $set: playerFields }, { new: false })
           .then((player) => {
+            console.log(player.photo);
             fileDelete.deleteFile(player.photo);
             res.json(player);
           })
