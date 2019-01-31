@@ -18,9 +18,8 @@ exports.validateCountry = function(data) {
     errors.file = "Selecione uma imagem para bandeira do pais";
   }
 
-  return {
-    errors,
-    isValid: isEmpty(errors)
+  return { 
+    isValid: isEmpty(errors) 
   };
 };
 
