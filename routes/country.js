@@ -56,6 +56,7 @@ router.post('/add-country', isAuth, (req, res) => {
         if (countryFields.flag) {
           fileDelete.deleteFile(countryFields.flag);
         }
+        console.log(errors);
         return res.status(400).json(errors);
       }
       //
@@ -73,12 +74,15 @@ router.post('/add-country', isAuth, (req, res) => {
     } else {
       Country.findOne({ name: countryFields.name }).then((country) => {
         if (country) {
-          return res.status(400).json({ msg: 'Nome de país já cadastrado' });
+          return res.status(400).json({ name: 'Nome de país já cadastrado' });
         }
         // Validação
         const { errors, isValid } = validators.validateCountry(countryFields);
         if (!isValid) {
-          fileDelete.deleteFile(countryFields.flag);
+          if (countryFields.flag) {
+            fileDelete.deleteFile(countryFields.flag);
+          }
+          console.log(errors);
           return res.status(400).json(errors);
         }
         //
