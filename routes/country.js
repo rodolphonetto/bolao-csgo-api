@@ -82,7 +82,6 @@ router.post('/add-country', isAuth, (req, res) => {
           if (countryFields.flag) {
             fileDelete.deleteFile(countryFields.flag);
           }
-          console.log(errors);
           return res.status(400).json(errors);
         }
         //
@@ -112,7 +111,7 @@ router.get('/edit-country/:countryID', isAuth, (req, res) => {
 });
 
 // Rota que deleta um país
-router.get('/del-country/:countryID', isAuth, (req, res) => {
+router.put('/del-country/:countryID', isAuth, (req, res) => {
   const countryID = req.params.countryID;
   Country.findById(countryID)
     .then((country) => {
@@ -120,7 +119,7 @@ router.get('/del-country/:countryID', isAuth, (req, res) => {
         return res.status(404).json({ msg: 'Pais não encontrado' });
       }
       fileDelete.deleteFile(country.flag);
-      Country.remove({ _id: countryID }).then(() => res.json({ msg: 'Pais excluido com sucesso' }));
+      Country.remove({ _id: countryID }).then(() => res.json({ msg: 'Pais excluido com sucesso', countryID }));
     })
     .catch((err) => {
       console.log(err);
