@@ -7,16 +7,36 @@ const validators = require('../validation/country');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
+const ITEMS_PER_PAGE = 1;
+
 let oldImage;
 
 // Rota que devolve os paises
 router.get('/', isAuth, (req, res) => {
+  const page = +req.query.page;
+
+  let totalItens;
   Country.find()
+    .countDocuments()
+    .then((numCountries) => {
+      totalItens = numCountries;
+      return Country.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((countries) => {
       if (isEmpty(countries)) {
         return res.status(404).json({ msg: 'Nenhum país encontrado' });
       }
-      return res.json(countries);
+      return res.json({
+        countries,
+        currentPage: page,
+        hasNextPage: ITEMS_PER_PAGE * page < totalItens,
+        hasPrevPage: page - 1 > 0,
+        nextPage: page + 1,
+        previousPage: page - 1,
+        lastPage: Math.ceil(totalItens / ITEMS_PER_PAGE),
+      });
     })
     .catch((err) => {
       console.log(err);
