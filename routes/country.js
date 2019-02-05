@@ -7,13 +7,12 @@ const validators = require('../validation/country');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
-const ITEMS_PER_PAGE = 12;
-
 let oldImage;
 
 // Rota que devolve os paises
 router.get('/', isAuth, (req, res) => {
   const page = +req.query.page;
+  const itemsPerPage = +req.query.maxItems;
 
   let totalItens;
   Country.find()
@@ -21,8 +20,8 @@ router.get('/', isAuth, (req, res) => {
     .then((numCountries) => {
       totalItens = numCountries;
       return Country.find()
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE);
+        .skip((page - 1) * itemsPerPage)
+        .limit(itemsPerPage);
     })
     .then((countries) => {
       if (isEmpty(countries)) {
@@ -31,11 +30,11 @@ router.get('/', isAuth, (req, res) => {
       return res.json({
         countries,
         currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItens,
+        hasNextPage: itemsPerPage * page < totalItens,
         hasPrevPage: page - 1 > 0,
         nextPage: page + 1,
         previousPage: page - 1,
-        lastPage: Math.ceil(totalItens / ITEMS_PER_PAGE),
+        lastPage: Math.ceil(totalItens / itemsPerPage),
       });
     })
     .catch((err) => {
@@ -76,7 +75,6 @@ router.post('/add-country', isAuth, (req, res) => {
         if (countryFields.flag) {
           fileDelete.deleteFile(countryFields.flag);
         }
-        console.log(errors);
         return res.status(400).json(errors);
       }
       //
@@ -89,7 +87,7 @@ router.post('/add-country', isAuth, (req, res) => {
         })
         .catch((err) => {
           fileDelete.deleteFile(countryFields.flag);
-          console.log(err);
+          res.status(400).json(err);
         });
     } else {
       Country.findOne({ name: countryFields.name }).then((country) => {
@@ -110,7 +108,7 @@ router.post('/add-country', isAuth, (req, res) => {
           .then(result => res.json(result))
           .catch((err) => {
             fileDelete.deleteFile(countryFields.flag);
-            console.log(err);
+            res.status(400).json(err);
           });
       });
     }

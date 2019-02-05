@@ -6,21 +6,20 @@ const validators = require('../validation/team');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
-const ITEMS_PER_PAGE = 1;
-
 let oldImage;
 
 // Retornar times cadastrados
 router.get('/', (req, res) => {
   const page = +req.query.page;
+  const itemsPerPage = +req.query.maxItems;
   let totalItens;
   Team.find()
     .countDocuments()
     .then((numTeams) => {
       totalItens = numTeams;
       return Team.find()
-        .skip((page - 1) * ITEMS_PER_PAGE)
-        .limit(ITEMS_PER_PAGE)
+        .skip((page - 1) * itemsPerPage)
+        .limit(itemsPerPage)
         .populate('country');
     })
     .then((teams) => {
@@ -30,11 +29,11 @@ router.get('/', (req, res) => {
       return res.json({
         teams,
         currentPage: page,
-        hasNextPage: ITEMS_PER_PAGE * page < totalItens,
+        hasNextPage: itemsPerPage * page < totalItens,
         hasPrevPage: page - 1 > 0,
         nextPage: page + 1,
         previousPage: page - 1,
-        lastPage: Math.ceil(totalItens / ITEMS_PER_PAGE),
+        lastPage: Math.ceil(totalItens / itemsPerPage),
       });
     })
     .catch((err) => {
@@ -85,17 +84,27 @@ router.post('/add-team', (req, res) => {
 
   Team.findById(teamID).then((team) => {
     if (team) {
+      oldImage = team.logo;
       // Validação
       const { errors, isValid } = validators.validateEditTeam(teamFields);
       if (!isValid) {
-        fileDelete.deleteFile(teamFields.logo);
+        if (teamFields.logo) {
+          fileDelete.deleteFile(teamFields.logo);
+        }
         return res.status(400).json(errors);
       }
       //
-      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true }).then((team) => {
-        fileDelete.deleteFile(team.logo);
-        res.json(team);
-      });
+      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true })
+        .then((team) => {
+          if (teamFields.flag) {
+            fileDelete.deleteFile(oldImage);
+          }
+          res.json(team);
+        })
+        .catch((err) => {
+          fileDelete.deleteFile(teamFields.logo);
+          res.status(400).json(err);
+        });
     } else {
       Team.findOne({ name: teamFields.name }).then((team) => {
         if (team) {
@@ -104,7 +113,9 @@ router.post('/add-team', (req, res) => {
         // Validação
         const { errors, isValid } = validators.validateTeam(teamFields);
         if (!isValid) {
-          fileDelete.deleteFile(teamFields.logo);
+          if (teamFields.logo) {
+            fileDelete.deleteFile(teamFields.logo);
+          }
           return res.status(400).json(errors);
         }
         //
@@ -113,7 +124,7 @@ router.post('/add-team', (req, res) => {
           .then(team => res.json(team))
           .catch((err) => {
             fileDelete.deleteFile(teamFields.logo);
-            console.log(err);
+            res.status(400).json(err);
           });
       });
     }
