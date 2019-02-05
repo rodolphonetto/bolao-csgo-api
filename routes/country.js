@@ -7,7 +7,7 @@ const validators = require('../validation/country');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
-const ITEMS_PER_PAGE = 1;
+const ITEMS_PER_PAGE = 12;
 
 let oldImage;
 
