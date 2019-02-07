@@ -143,8 +143,8 @@ router.get('/edit-team/:teamID', (req, res) => {
 });
 
 // Deletar Time
-router.post('/del-team', (req, res) => {
-  const teamID = req.body.teamID;
+router.put('/del-team/:teamID', (req, res) => {
+  const teamID = req.params.teamID;
 
   Team.findById(teamID)
     .then((team) => {
@@ -152,7 +152,7 @@ router.post('/del-team', (req, res) => {
         return res.status(404).json({ msg: 'Time não encontrado' });
       }
       fileDelete.deleteFile(team.logo);
-      Team.remove({ _id: teamID }).then(team => res.json({ msg: 'Time excluido com sucesso' }));
+      Team.remove({ _id: teamID }).then(() => res.json({ msg: 'Time excluido com sucesso', teamID }));
     })
     .catch((err) => {
       console.log(err);

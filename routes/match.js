@@ -131,19 +131,19 @@ router.post('/add-match', (req, res) => {
     });
 });
 
-// Deletar partida
-router.post('/del-match', (req, res) => {
-  const matchID = req.body.matchID;
+// Deletar Partida
+router.put('/del-match/:matchID', (req, res) => {
+  const matchID = req.params.matchID;
 
   Match.findById(matchID)
     .then((match) => {
       if (!match) {
-        return res.status(404).json({ msg: 'Partida não encontrada' });
+        return res.status(404).json({ msg: 'Partida não encontrado' });
       }
-      match.remove({ _id: matchID }).then(() => res.json({ msg: 'Partida excluida com sucesso' }));
+      Match.remove({ _id: matchID }).then(() => res.json({ msg: 'Partida excluida com sucesso', matchID }));
     })
     .catch((err) => {
-      console.log(err);
+      res.status(400).json({ msg: 'Algo deu errado por favor entre em contato com o suporte!' });
     });
 });
 
