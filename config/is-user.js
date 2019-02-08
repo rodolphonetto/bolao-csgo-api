@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
 
 module.exports = (req, res, next) => {
   const rawToken = req.get('Authorization');
@@ -24,12 +23,5 @@ module.exports = (req, res, next) => {
   req.userId = decodedToken.userid;
   req.username = decodedToken.username;
   req.email = decodedToken.email;
-
-  User.findById(req.userId).then((user) => {
-    if (user.admin === true) {
-      next();
-    } else {
-      return res.status(401).json({ msg: 'Você não tem autorização para acessar essa area' });
-    }
-  });
+  next();
 };

@@ -2,6 +2,8 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const isAuth = require('../config/is-auth');
+
 const router = express.Router();
 const User = require('../models/user');
 const validators = require('../validation/user');
@@ -28,6 +30,7 @@ router.post('/login', (req, res) => {
           email: loadedUser.email,
           username: loadedUser.username,
           userid: loadedUser._id.toString(),
+          userAdmin: loadedUser.admin,
         },
         '!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#',
         { expiresIn: '1h' },
@@ -71,7 +74,7 @@ router.post('/signup', (req, res) => {
 });
 
 // Deletar usuario
-router.post('/del-user', (req, res) => {
+router.post('/del-user', isAuth, (req, res) => {
   const userID = req.body.userID;
 
   User.findById(userID)

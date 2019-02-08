@@ -1,4 +1,5 @@
 const express = require('express');
+const isAuth = require('../config/is-auth');
 
 const router = express.Router();
 const Team = require('../models/team');
@@ -9,7 +10,7 @@ const fileDelete = require('../config/file');
 let oldImage;
 
 // Retornar times cadastrados
-router.get('/', (req, res) => {
+router.get('/', isAuth, (req, res) => {
   const page = +req.query.page;
   const itemsPerPage = +req.query.maxItems;
   let totalItens;
@@ -42,7 +43,7 @@ router.get('/', (req, res) => {
 });
 
 // Pesquisa de times
-router.post('/search-team', (req, res) => {
+router.post('/search-team', isAuth, (req, res) => {
   const teamName = req.body.teamName;
   Team.find({
     name: new RegExp(teamName, 'i'),
@@ -59,7 +60,7 @@ router.post('/search-team', (req, res) => {
 });
 
 // Detalha times
-router.get('/edit-team/:teamID', (req, res) => {
+router.get('/edit-team/:teamID', isAuth, (req, res) => {
   const teamID = req.params.teamID;
   Team.findById(teamID)
     .populate({
@@ -75,7 +76,7 @@ router.get('/edit-team/:teamID', (req, res) => {
 });
 
 // Adicionar/Editar novo time
-router.post('/add-team', (req, res) => {
+router.post('/add-team', isAuth, (req, res) => {
   const teamFields = {};
   const teamID = req.body.teamID;
   if (req.body.name) teamFields.name = req.body.name;
@@ -132,7 +133,7 @@ router.post('/add-team', (req, res) => {
 });
 
 // Devolver time para edição
-router.get('/edit-team/:teamID', (req, res) => {
+router.get('/edit-team/:teamID', isAuth, (req, res) => {
   const teamID = req.params.teamID;
   Team.findById(teamID).then((team) => {
     if (!team) {
@@ -143,7 +144,7 @@ router.get('/edit-team/:teamID', (req, res) => {
 });
 
 // Deletar Time
-router.put('/del-team/:teamID', (req, res) => {
+router.put('/del-team/:teamID', isAuth, (req, res) => {
   const teamID = req.params.teamID;
 
   Team.findById(teamID)
@@ -162,7 +163,7 @@ router.put('/del-team/:teamID', (req, res) => {
 // *** Gerenciamento de players *** //
 
 // Adicionar player ao time
-router.post('/add-player', (req, res) => {
+router.post('/add-player', isAuth, (req, res) => {
   const teamID = req.body.teamID;
   const playerID = req.body.playerID;
 
@@ -178,7 +179,7 @@ router.post('/add-player', (req, res) => {
 });
 
 // Remover player ao time
-router.post('/remove-player', (req, res) => {
+router.post('/remove-player', isAuth, (req, res) => {
   const teamID = req.body.teamID;
   const playerID = req.body.playerID;
 

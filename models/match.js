@@ -25,6 +25,27 @@ const matchSchema = new Schema({
     type: Number,
     required: true,
   },
+
+  bets: [
+    {
+      resultA: {
+        type: Number,
+        required: true,
+      },
+      resultB: {
+        type: Number,
+        required: true,
+      },
+      match: {
+        type: Schema.Types.ObjectId,
+        ref: 'Match',
+      },
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    },
+  ],
   event: {
     type: Schema.Types.ObjectId,
     ref: 'Evento',

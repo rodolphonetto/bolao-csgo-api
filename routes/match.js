@@ -1,4 +1,5 @@
 const express = require('express');
+const isAuth = require('../config/is-auth');
 
 const router = express.Router();
 const Match = require('../models/match');
@@ -40,7 +41,7 @@ router.get('/', (req, res) => {
 });
 
 // Pesquisa de partidas
-router.post('/search-match', (req, res) => {
+router.post('/search-match', isAuth, (req, res) => {
   const matchName = req.body.matchName;
   Match.find({
     name: new RegExp(matchName, 'i'),
@@ -57,7 +58,7 @@ router.post('/search-match', (req, res) => {
 });
 
 // Devolver partida para edição
-router.get('/edit-match/:matchID', (req, res) => {
+router.get('/edit-match/:matchID', isAuth, (req, res) => {
   const match = req.params.matchID;
   Match.findById(match)
     .populate('teamA')
@@ -71,7 +72,7 @@ router.get('/edit-match/:matchID', (req, res) => {
 });
 
 // Adicionar/Editar nova partida
-router.post('/add-match', (req, res) => {
+router.post('/add-match', isAuth, (req, res) => {
   const matchFields = {};
   const matchID = req.body.matchID;
   if (req.body.desc) matchFields.desc = req.body.desc;
@@ -132,7 +133,7 @@ router.post('/add-match', (req, res) => {
 });
 
 // Deletar Partida
-router.put('/del-match/:matchID', (req, res) => {
+router.put('/del-match/:matchID', isAuth, (req, res) => {
   const matchID = req.params.matchID;
 
   Match.findById(matchID)
