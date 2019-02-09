@@ -73,6 +73,7 @@ router.get('/edit-match/:matchID', isAuth, (req, res) => {
 
 // Adicionar/Editar nova partida
 router.post('/add-match', isAuth, (req, res) => {
+  console.log(req.body.open);
   const matchFields = {};
   const matchID = req.body.matchID;
   if (req.body.desc) matchFields.desc = req.body.desc;
@@ -93,8 +94,12 @@ router.post('/add-match', isAuth, (req, res) => {
   } else {
     matchFields.event = '5c3f242dd136ae0638b20d30';
   }
-  if (req.body.open === 1) matchFields.open = false;
-  if (req.body.finished === 1) matchFields.finished = true;
+
+  if (req.body.open === 'sim') {
+    matchFields.open = true;
+  } else {
+    matchFields.open = false;
+  }
 
   Match.findById(matchID)
     .then((match) => {
