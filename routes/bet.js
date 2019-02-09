@@ -1,5 +1,7 @@
 const express = require('express');
 
+const mongoose = require('mongoose');
+
 const router = express.Router();
 const Bet = require('../models/bet');
 const Match = require('../models/match');
@@ -41,71 +43,42 @@ router.get('/edit-bet/:betID', (req, res) => {
 // Adicionar/Editar nova aposta
 // TODO Criar validação para travar duas apostas no mesmo jogo.
 router.post('/add-bet', (req, res) => {
-  console.log(req.body);
   const betFields = {};
-  let betID;
   const matchID = req.body.matchID;
-
+  const ObjectId = mongoose.Types.ObjectId;
+  const userID = req.body.userID;
   if (req.body.resultA) betFields.resultA = req.body.resultA;
   if (req.body.resultB) betFields.resultB = req.body.resultB;
   if (req.body.matchID) betFields.match = req.body.matchID;
   if (req.body.userID) betFields.user = req.body.userID;
-  if (req.body.betID) betID = req.body.betID;
 
-  Bet.findById(betID)
-    .then((bet) => {
-      if (bet) {
-        // Validação
-        const { errors, isValid } = validators.validateEditBet(betFields);
-        if (!isValid) {
-          return res.status(400).json(errors);
-        }
-        //
-        Match.findOneAndUpdate({ _id: matchID }, { $set: { bets: betFields } }, { new: true })
-          .then((match) => {
-            console.log('oi2');
-            res.json(match);
-          })
-          .catch((err) => {
-            console.log(err);
-            res.status(400).json(err);
-          });
-      } else {
-        // Validação
-        const { errors, isValid } = validators.validateBet(betFields);
-        if (!isValid) {
-          return res.status(400).json(errors);
-        }
-        //
-        Match.findOneAndUpdate({ _id: matchID }, { $set: { bets: betFields } }, { new: true })
-          .then((match) => {
-            res.json(match);
-          })
-          .catch((err) => {
-            console.log(err);
-            res.status(400).json(err);
-          });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
-
-// Deletar Aposta
-router.post('/del-bet', (req, res) => {
-  const betID = req.body.betID;
-
-  Bet.findById(betID)
-    .then((bet) => {
-      if (!bet) {
-        return res.status(404).json({ msg: 'Aposta não encontrada' });
-      }
-      Bet.remove({ _id: betID }).then(bet => res.json({ msg: 'Aposta excluida com sucesso' }));
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+  Match.aggregate([
+    {
+      $unwind: '$bets',
+    },
+    { $match: { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) } },
+  ]).then((teste) => {
+    if (teste.length > 0) {
+      Match.updateOne(
+        { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) },
+        { $set: { 'bets.$.resultA': betFields.resultA, 'bets.$.resultB': betFields.resultB } },
+      )
+        .then((match) => {
+          res.json(match);
+        })
+        .catch((err) => {
+          res.status(400).json(err);
+        });
+    } else {
+      Match.findOneAndUpdate({ _id: matchID }, { $push: { bets: betFields } }, { new: true })
+        .then((match) => {
+          res.json(match);
+        })
+        .catch((err) => {
+          res.status(400).json(err);
+        });
+    }
+  });
 });
 
 module.exports = router;
