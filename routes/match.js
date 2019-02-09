@@ -73,7 +73,6 @@ router.get('/edit-match/:matchID', isAuth, (req, res) => {
 
 // Adicionar/Editar nova partida
 router.post('/add-match', isAuth, (req, res) => {
-  console.log(req.body.open);
   const matchFields = {};
   const matchID = req.body.matchID;
   if (req.body.desc) matchFields.desc = req.body.desc;

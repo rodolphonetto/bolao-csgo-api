@@ -3,45 +3,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const router = express.Router();
-const Bet = require('../models/bet');
 const Match = require('../models/match');
 const validators = require('../validation/bet');
 const isEmpty = require('../validation/is-empty');
 
-// Retornar apostas cadastrados
-// TODO Ajustar populate para campos necessários apenas.
-router.get('/', (req, res) => {
-  Bet.find()
-    .populate('match')
-    .populate('user')
-    .then((bets) => {
-      if (isEmpty(bets)) {
-        return res.status(404).json({ msg: 'Nenhuma aposta encontrada' });
-      }
-      return res.json(bets);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+const populateMatch = ID => Match.findById(ID)
+  .populate('teamA')
+  .populate('teamB');
 
-// Detalha aposta
-// TODO Ajustar populate para campos necessários apenas.
-router.get('/edit-bet/:betID', (req, res) => {
-  const betID = req.params.betID;
-  Bet.findById(betID)
-    .populate('match')
-    .populate('user')
-    .then((bet) => {
-      if (!bet) {
-        return res.status(404).json({ msg: 'Aposta não encontrada' });
-      }
-      return res.json(bet);
-    });
-});
+const verifyClosed = ID => Match.findById(ID);
 
 // Adicionar/Editar nova aposta
-// TODO Criar validação para travar duas apostas no mesmo jogo.
 router.post('/add-bet', (req, res) => {
   const betFields = {};
   const matchID = req.body.matchID;
@@ -52,31 +24,40 @@ router.post('/add-bet', (req, res) => {
   if (req.body.matchID) betFields.match = req.body.matchID;
   if (req.body.userID) betFields.user = req.body.userID;
 
-  Match.aggregate([
-    {
-      $unwind: '$bets',
-    },
-    { $match: { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) } },
-  ]).then((teste) => {
-    if (teste.length > 0) {
-      Match.updateOne(
-        { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) },
-        { $set: { 'bets.$.resultA': betFields.resultA, 'bets.$.resultB': betFields.resultB } },
-      )
-        .then((match) => {
-          res.json(match);
-        })
-        .catch((err) => {
-          res.status(400).json(err);
-        });
+  verifyClosed(matchID).then((match) => {
+    if (match.open) {
+      Match.aggregate([
+        {
+          $unwind: '$bets',
+        },
+        { $match: { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) } },
+      ]).then((bets) => {
+        if (bets.length > 0) {
+          Match.findOneAndUpdate(
+            { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) },
+            { $set: { 'bets.$.resultA': betFields.resultA, 'bets.$.resultB': betFields.resultB } },
+            {
+              new: true,
+            },
+          )
+            .then((match) => {
+              populateMatch(match._id).then(bet => res.json(bet));
+            })
+            .catch((err) => {
+              res.status(400).json(err);
+            });
+        } else {
+          Match.findOneAndUpdate({ _id: matchID }, { $push: { bets: betFields } }, { new: true })
+            .then((match) => {
+              populateMatch(match._id).then(bet => res.json(bet));
+            })
+            .catch((err) => {
+              res.status(400).json(err);
+            });
+        }
+      });
     } else {
-      Match.findOneAndUpdate({ _id: matchID }, { $push: { bets: betFields } }, { new: true })
-        .then((match) => {
-          res.json(match);
-        })
-        .catch((err) => {
-          res.status(400).json(err);
-        });
+      res.status(400).json({ msg: 'Vocẽ não pode apostar em uma partida fechada' });
     }
   });
 });
