@@ -7,7 +7,6 @@ const router = express.Router();
 const Match = require('../models/match');
 const User = require('../models/user');
 const validators = require('../validation/bet'); // TODO ADICIONAR VALIDAÇÕES
-const isEmpty = require('../validation/is-empty'); // ADICIONAR VALIDAÇÕES
 
 let score;
 
@@ -15,9 +14,18 @@ const populateMatch = ID => Match.findById(ID)
   .populate('teamA')
   .populate('teamB');
 
-const verifyClosed = ID => Match.findById(ID);
+const verifyMatch = ID => Match.findById(ID);
 
 const updateBet = (matchID, userID, resultA, resultB, res) => {
+  const data = { resultA, resultB };
+
+  // Validação
+  const { errors, isValid } = validators.validateBet(data);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+  //
+
   Match.findOneAndUpdate(
     { _id: ObjectId(matchID), 'bets.user': ObjectId(userID) },
     { $set: { 'bets.$.resultA': resultA, 'bets.$.resultB': resultB } },
@@ -34,6 +42,14 @@ const updateBet = (matchID, userID, resultA, resultB, res) => {
 };
 
 const newBet = (matchID, betFields, res) => {
+  const data = { resultA: betFields.resultA, resultB: betFields.resultB };
+  // Validação
+  const { errors, isValid } = validators.validateBet(data);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+  //
+
   Match.findOneAndUpdate({ _id: matchID }, { $push: { bets: betFields } }, { new: true })
     .then((match) => {
       populateMatch(match._id).then(bet => res.json(bet));
@@ -58,10 +74,16 @@ const definePoints = (bet, match) => {
   return 0;
 };
 
-const updateUserPoints = (match) => {
+const updateUserPoints = (match, res) => {
   match.bets.forEach((bet) => {
     const points = definePoints(bet, match);
-    User.findOneAndUpdate({ _id: bet.user }, { $inc: { points } }, { new: true });
+    User.findOneAndUpdate({ _id: bet.user }, { $inc: { points } }, { new: true })
+      .then((user) => {
+        console.log(user);
+      })
+      .catch((err) => {
+        res.status(400).json(err);
+      });
   });
 };
 
@@ -76,7 +98,7 @@ router.post('/add-bet', (req, res) => {
   if (req.body.matchID) betFields.match = req.body.matchID;
   if (req.body.userID) betFields.user = req.body.userID;
 
-  verifyClosed(matchID).then((match) => {
+  verifyMatch(matchID).then((match) => {
     if (match.open) {
       Match.aggregate([
         {
@@ -99,9 +121,19 @@ router.post('/add-bet', (req, res) => {
 router.put('/fin-match/:matchID', (req, res) => {
   const matchID = req.params.matchID;
 
-  Match.findOneAndUpdate({ _id: matchID }, { finished: true }, { new: true }).then((match) => {
-    updateUserPoints(match, res);
-    res.json({ msg: 'Usuarios atualizados com sucesso' });
+  verifyMatch(matchID).then((match) => {
+    if (match.resultA && match.resultB) {
+      Match.findOneAndUpdate({ _id: matchID }, { finished: true }, { new: true })
+        .then((match) => {
+          updateUserPoints(match, res);
+          res.json({ msg: 'Usuarios atualizados com sucesso' });
+        })
+        .catch((err) => {
+          res.status(400).json(err);
+        });
+    } else {
+      res.status(400).json({ msg: 'Preencha o placar da partida antes de finalizar' });
+    }
   });
 });
 
