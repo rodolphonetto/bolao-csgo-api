@@ -15,15 +15,13 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  bets: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Bet',
-    },
-  ],
   admin: {
     type: Boolean,
     default: false,
+  },
+  points: {
+    type: Number,
+    default: 0,
   },
 });
 
