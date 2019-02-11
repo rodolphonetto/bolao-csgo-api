@@ -32,7 +32,7 @@ router.post('/login', (req, res) => {
           userid: loadedUser._id.toString(),
           userAdmin: loadedUser.admin,
         },
-        '!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#',
+        process.env.SECRET_KEY,
         { expiresIn: '1h' },
       );
       res.status(200).json({ token });

@@ -1,4 +1,5 @@
 module.exports = {
-	mongoURI:
-	'mongodb+srv://rodolpho:F53tv7ccsyLqwCeN@cluster0-uypd6.mongodb.net/bolao?retryWrites=true'
-}
+  mongoURI: `mongodb+srv://${process.env.MONGO_USER}:${
+    process.env.MONGO_PASSWORD
+  }@cluster0-uypd6.mongodb.net/bolao?retryWrites=true`,
+};

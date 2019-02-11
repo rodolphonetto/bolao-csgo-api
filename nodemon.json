@@ -1,0 +1,7 @@
+{
+  "env": {
+    "SECRET_KEY": "!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#",
+    "MONGO_USER": "rodolpho",
+    "MONGO_PASSWORD": "F53tv7ccsyLqwCeN"
+  }
+}

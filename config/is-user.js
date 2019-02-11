@@ -9,10 +9,7 @@ module.exports = (req, res, next) => {
 
   let decodedToken;
   try {
-    decodedToken = jwt.verify(
-      token,
-      '!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#',
-    );
+    decodedToken = jwt.verify(token, process.env.SECRET_KEY);
   } catch (err) {
     return res.status(404).json({ msg: 'Você não tem autorização para acessar essa area' });
   }
