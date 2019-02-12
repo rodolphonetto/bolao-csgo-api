@@ -10,6 +10,13 @@ const validators = require('../validation/bet'); // TODO ADICIONAR VALIDAÇÕES
 
 let score;
 
+const getUsers = async () => {
+  const users = await User.find({ points: { $gt: 0 } }, { _id: 0, username: 1, points: 1 }).sort([
+    ['points', 'descending'],
+  ]);
+  return users;
+};
+
 const populateMatch = ID => Match.findById(ID)
   .populate('teamA')
   .populate('teamB');
@@ -22,7 +29,7 @@ const updateBet = (matchID, userID, resultA, resultB, res) => {
   // Validação
   const { errors, isValid } = validators.validateBet(data);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.status(400).json({ errors, matchID });
   }
   //
 
@@ -46,7 +53,7 @@ const newBet = (matchID, betFields, res) => {
   // Validação
   const { errors, isValid } = validators.validateBet(data);
   if (!isValid) {
-    return res.status(400).json(errors);
+    return res.status(400).json({ errors, matchID });
   }
   //
 
@@ -135,6 +142,12 @@ router.put('/fin-match/:matchID', (req, res) => {
       res.status(400).json({ msg: 'Preencha o placar da partida antes de finalizar' });
     }
   });
+});
+
+router.get('/ranking', async (req, res) => {
+  const users = await getUsers();
+  console.log(users);
+  res.json(users);
 });
 
 module.exports = router;

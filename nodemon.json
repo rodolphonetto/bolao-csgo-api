@@ -3,6 +3,7 @@
     "SECRET_KEY": "!@#AquiNaoJaoAquiEProtegidoPorqueEuCrieiUmSegredoGrandePorqueONegocioDiziaQueEraFraco!@#",
     "MONGO_USER": "rodolpho",
     "MONGO_PASSWORD": "F53tv7ccsyLqwCeN",
+    "MONGO_DATABASE": "bolao-dev",
     "CLOUDINARY_URL": "cloudinary://643673452146514:zs4ORkrq6ssCw8xkBEzhHltrTcA@rodolphonetto"
   }
 }
