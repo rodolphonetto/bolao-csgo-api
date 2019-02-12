@@ -15,7 +15,6 @@ router.post('/login', (req, res) => {
   let loadedUser;
   User.findOne({ username })
     .then((user) => {
-      console.log(username, password, user);
       if (!user) {
         return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
       }
