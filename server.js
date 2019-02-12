@@ -51,7 +51,6 @@ const fileFilter = (req, file, cb) => {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, filefilter: fileFilter }).single('image'));
-console.log(__dirname);
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/countries', country);
@@ -64,4 +63,4 @@ app.use('/auth', auth);
 
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => console.log(`Servidor rodando na porta ${port} ${path.join(__dirname, 'images')}`));
+app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
