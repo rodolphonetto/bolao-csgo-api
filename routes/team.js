@@ -1,13 +1,71 @@
 const express = require('express');
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+  cloud_name: 'rodolphonetto',
+  api_key: '643673452146514',
+  api_secret: 'zs4ORkrq6ssCw8xkBEzhHltrTcA',
+});
+
 const isAuth = require('../config/is-auth');
 
 const router = express.Router();
 const Team = require('../models/team');
 const validators = require('../validation/team');
 const isEmpty = require('../validation/is-empty');
-const fileDelete = require('../config/file');
 
-let oldImage;
+const logoUpload = image => cloudinary.v2.uploader.upload(image);
+
+const teamControl = async (req, res) => {
+  let result;
+  if (req.file) {
+    result = await logoUpload(req.file.path);
+  }
+
+  const teamFields = {};
+  const teamID = req.body.teamID;
+  if (req.file) teamFields.url = result.url;
+  if (req.body.name) teamFields.name = req.body.name;
+  if (req.file) teamFields.logo = result.public_id;
+  if (req.body.country) teamFields.country = req.body.country;
+
+  Team.findById(teamID).then((team) => {
+    if (team) {
+      // Validação
+      const { errors, isValid } = validators.validateEditTeam(teamFields);
+      if (!isValid) {
+        return res.status(400).json(errors);
+      }
+      //
+
+      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true })
+        .then((team) => {
+          res.json(team);
+        })
+        .catch((err) => {
+          res.status(400).json(err);
+        });
+    } else {
+      Team.findOne({ name: teamFields.name }).then((team) => {
+        if (team) {
+          return res.status(400).json({ msg: 'Nome de time já cadastrado' });
+        }
+        // Validação
+        const { errors, isValid } = validators.validateTeam(teamFields);
+        if (!isValid) {
+          return res.status(400).json(errors);
+        }
+        //
+        new Team(teamFields)
+          .save()
+          .then(team => res.json(team))
+          .catch((err) => {
+            res.status(400).json(err);
+          });
+      });
+    }
+  });
+};
 
 // Retornar times cadastrados
 router.get('/', isAuth, (req, res) => {
@@ -77,59 +135,7 @@ router.get('/edit-team/:teamID', isAuth, (req, res) => {
 
 // Adicionar/Editar novo time
 router.post('/add-team', isAuth, (req, res) => {
-  const teamFields = {};
-  const teamID = req.body.teamID;
-  if (req.body.name) teamFields.name = req.body.name;
-  if (req.file) teamFields.logo = req.file.filename;
-  if (req.body.country) teamFields.country = req.body.country;
-
-  Team.findById(teamID).then((team) => {
-    if (team) {
-      oldImage = team.logo;
-      // Validação
-      const { errors, isValid } = validators.validateEditTeam(teamFields);
-      if (!isValid) {
-        if (teamFields.logo) {
-          fileDelete.deleteFile(teamFields.logo);
-        }
-        return res.status(400).json(errors);
-      }
-      //
-      Team.findOneAndUpdate({ _id: teamID }, { $set: teamFields }, { new: true })
-        .then((team) => {
-          if (teamFields.flag) {
-            fileDelete.deleteFile(oldImage);
-          }
-          res.json(team);
-        })
-        .catch((err) => {
-          fileDelete.deleteFile(teamFields.logo);
-          res.status(400).json(err);
-        });
-    } else {
-      Team.findOne({ name: teamFields.name }).then((team) => {
-        if (team) {
-          return res.status(400).json({ msg: 'Nome de time já cadastrado' });
-        }
-        // Validação
-        const { errors, isValid } = validators.validateTeam(teamFields);
-        if (!isValid) {
-          if (teamFields.logo) {
-            fileDelete.deleteFile(teamFields.logo);
-          }
-          return res.status(400).json(errors);
-        }
-        //
-        new Team(teamFields)
-          .save()
-          .then(team => res.json(team))
-          .catch((err) => {
-            fileDelete.deleteFile(teamFields.logo);
-            res.status(400).json(err);
-          });
-      });
-    }
-  });
+  teamControl(req, res);
 });
 
 // Devolver time para edição
@@ -152,7 +158,6 @@ router.put('/del-team/:teamID', isAuth, (req, res) => {
       if (!team) {
         return res.status(404).json({ msg: 'Time não encontrado' });
       }
-      fileDelete.deleteFile(team.logo);
       Team.remove({ _id: teamID }).then(() => res.json({ msg: 'Time excluido com sucesso', teamID }));
     })
     .catch((err) => {

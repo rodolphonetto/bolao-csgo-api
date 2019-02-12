@@ -7,6 +7,10 @@ const teamSchema = new Schema({
     type: String,
     required: true,
   },
+  url: {
+    type: String,
+    required: true,
+  },
   logo: {
     type: String,
     required: true,

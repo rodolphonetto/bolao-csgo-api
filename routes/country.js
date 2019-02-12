@@ -1,5 +1,12 @@
 const express = require('express');
+const cloudinary = require('cloudinary');
 const isAuth = require('../config/is-auth');
+
+cloudinary.config({
+  cloud_name: 'rodolphonetto',
+  api_key: '643673452146514',
+  api_secret: 'zs4ORkrq6ssCw8xkBEzhHltrTcA',
+});
 
 const router = express.Router();
 const Country = require('../models/country');
@@ -7,7 +14,57 @@ const validators = require('../validation/country');
 const isEmpty = require('../validation/is-empty');
 const fileDelete = require('../config/file');
 
-let oldImage;
+const logoUpload = image => cloudinary.v2.uploader.upload(image);
+
+const countryControl = async (req, res) => {
+  let result;
+  if (req.file) {
+    result = await logoUpload(req.file.path);
+  }
+
+  const countryFields = {};
+  const countryID = req.body.countryID;
+  if (req.file) countryFields.url = result.url;
+  if (req.body.name) countryFields.name = req.body.name;
+  if (req.file) countryFields.flag = result.public_id;
+
+  Country.findById(countryID).then((country) => {
+    if (country) {
+      // Validação
+      const { errors, isValid } = validators.validateEditCountry(countryFields);
+      if (!isValid) {
+        return res.status(400).json(errors);
+      }
+      //
+      Country.findOneAndUpdate({ _id: countryID }, { $set: countryFields }, { new: true })
+        .then((country) => {
+          res.json(country);
+        })
+        .catch((err) => {
+          fileDelete.deleteFile(countryFields.flag);
+          res.status(400).json(err);
+        });
+    } else {
+      Country.findOne({ name: countryFields.name }).then((country) => {
+        if (country) {
+          return res.status(400).json({ name: 'Nome de país já cadastrado' });
+        }
+        // Validação
+        const { errors, isValid } = validators.validateCountry(countryFields);
+        if (!isValid) {
+          return res.status(400).json(errors);
+        }
+        //
+        new Country(countryFields)
+          .save()
+          .then(result => res.json(result))
+          .catch((err) => {
+            res.status(400).json(err);
+          });
+      });
+    }
+  });
+};
 
 // Rota que devolve os paises
 router.get('/', isAuth, (req, res) => {
@@ -61,58 +118,7 @@ router.post('/search-country', isAuth, (req, res) => {
 
 // Rota que adiciona um novo pais
 router.post('/add-country', isAuth, (req, res) => {
-  const countryFields = {};
-  const countryID = req.body.countryID;
-  if (req.body.name) countryFields.name = req.body.name;
-  if (req.file) countryFields.flag = req.file.filename;
-
-  Country.findById(countryID).then((country) => {
-    if (country) {
-      oldImage = country.flag;
-      // Validação
-      const { errors, isValid } = validators.validateEditCountry(countryFields);
-      if (!isValid) {
-        if (countryFields.flag) {
-          fileDelete.deleteFile(countryFields.flag);
-        }
-        return res.status(400).json(errors);
-      }
-      //
-      Country.findOneAndUpdate({ _id: countryID }, { $set: countryFields }, { new: true })
-        .then((country) => {
-          if (countryFields.flag) {
-            fileDelete.deleteFile(oldImage);
-          }
-          res.json(country);
-        })
-        .catch((err) => {
-          fileDelete.deleteFile(countryFields.flag);
-          res.status(400).json(err);
-        });
-    } else {
-      Country.findOne({ name: countryFields.name }).then((country) => {
-        if (country) {
-          return res.status(400).json({ name: 'Nome de país já cadastrado' });
-        }
-        // Validação
-        const { errors, isValid } = validators.validateCountry(countryFields);
-        if (!isValid) {
-          if (countryFields.flag) {
-            fileDelete.deleteFile(countryFields.flag);
-          }
-          return res.status(400).json(errors);
-        }
-        //
-        new Country(countryFields)
-          .save()
-          .then(result => res.json(result))
-          .catch((err) => {
-            fileDelete.deleteFile(countryFields.flag);
-            res.status(400).json(err);
-          });
-      });
-    }
-  });
+  countryControl(req, res);
 });
 
 // Rota devolve pais para edição
