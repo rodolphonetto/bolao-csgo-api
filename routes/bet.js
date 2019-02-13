@@ -17,6 +17,14 @@ const getUsers = async () => {
   return users;
 };
 
+const getMatches = async () => {
+  const matches = await Match.find({ finished: true })
+    .populate('teamA')
+    .populate('teamB');
+  return matches;
+};
+
+
 const populateMatch = ID => Match.findById(ID)
   .populate('teamA')
   .populate('teamB');
@@ -146,8 +154,12 @@ router.put('/fin-match/:matchID', (req, res) => {
 
 router.get('/ranking', async (req, res) => {
   const users = await getUsers();
-  console.log(users);
   res.json(users);
+});
+
+router.get('/finished', async (req, res) => {
+  const matches = await getMatches();
+  res.json(matches);
 });
 
 module.exports = router;
