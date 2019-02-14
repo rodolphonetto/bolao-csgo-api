@@ -8,36 +8,71 @@ const router = express.Router();
 const User = require('../models/user');
 const validators = require('../validation/user');
 
-// Login
-router.post('/login', (req, res) => {
+// Route: /login
+// Restrict: Everyone
+
+const verifyUsername = async (username, res) => {
+  const loadedUser = await User.findOne({ username });
+  if (!loadedUser) {
+    return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
+  }
+  return loadedUser;
+};
+
+const createToken = (loadedUser, res) => {
+  const token = jwt.sign(
+    {
+      email: loadedUser.email,
+      username: loadedUser.username,
+      userid: loadedUser._id.toString(),
+      userAdmin: loadedUser.admin,
+    },
+    process.env.SECRET_KEY,
+    { expiresIn: '1h' },
+  );
+  return res.status(200).json({ token });
+};
+
+const verifyPassword = async (loadedUser, password, res) => {
+  const isEqual = await bcrypt.compare(password, loadedUser.password);
+  if (isEqual) {
+    createToken(loadedUser, res);
+  }
+  return res.status(401).json({ wrongPassword: 'Senha incorreta' });
+};
+
+router.post('/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  let loadedUser;
-  User.findOne({ username })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
-      }
-      loadedUser = user;
-      return bcrypt.compare(password, user.password);
-    })
-    .then((isEqual) => {
-      if (!isEqual) {
-        return res.status(401).json({ wrongPassword: 'Senha incorreta' });
-      }
-      const token = jwt.sign(
-        {
-          email: loadedUser.email,
-          username: loadedUser.username,
-          userid: loadedUser._id.toString(),
-          userAdmin: loadedUser.admin,
-        },
-        process.env.SECRET_KEY,
-        { expiresIn: '1h' },
-      );
-      res.status(200).json({ token });
-    })
-    .catch(err => console.log(err));
+
+  const loadedUser = await verifyUsername(username, res);
+  verifyPassword(loadedUser, password, res);
+
+  // User.findOne({ username })
+  //   .then((user) => {
+  //     if (!user) {
+  //       return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
+  //     }
+  //     loadedUser = user;
+  //     return bcrypt.compare(password, user.password);
+  //   })
+  //   .then((isEqual) => {
+  //     if (!isEqual) {
+  //       return res.status(401).json({ wrongPassword: 'Senha incorreta' });
+  //     }
+  //     const token = jwt.sign(
+  //       {
+  //         email: loadedUser.email,
+  //         username: loadedUser.username,
+  //         userid: loadedUser._id.toString(),
+  //         userAdmin: loadedUser.admin,
+  //       },
+  //       process.env.SECRET_KEY,
+  //       { expiresIn: '1h' },
+  //     );
+  //     res.status(200).json({ token });
+  //   })
+  //   .catch(err => console.log(err));
 });
 
 // Adicionar novo usuario
