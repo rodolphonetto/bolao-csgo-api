@@ -134,7 +134,7 @@ router.put('/fin-match/:matchID', (req, res) => {
   const matchID = req.params.matchID;
 
   verifyMatch(matchID).then((match) => {
-    if (match.resultA && match.resultB) {
+    if (match.resultA >= 0 && match.resultB >= 0) {
       Match.findOneAndUpdate({ _id: matchID }, { finished: true }, { new: true })
         .then((match) => {
           updateUserPoints(match, res);
