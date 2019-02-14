@@ -24,7 +24,6 @@ const getMatches = async () => {
   return matches;
 };
 
-
 const populateMatch = ID => Match.findById(ID)
   .populate('teamA')
   .populate('teamB');
@@ -93,9 +92,7 @@ const updateUserPoints = (match, res) => {
   match.bets.forEach((bet) => {
     const points = definePoints(bet, match);
     User.findOneAndUpdate({ _id: bet.user }, { $inc: { points } }, { new: true })
-      .then((user) => {
-        console.log(user);
-      })
+      .then(() => {})
       .catch((err) => {
         res.status(400).json(err);
       });

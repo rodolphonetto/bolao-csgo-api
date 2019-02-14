@@ -11,7 +11,7 @@ exports.validateBet = function (data) {
     errors.result = 'Campo resultado time A em branco, preencha o campo do placar com 00 em caso de derrota';
   }
 
-  if (!Validator.isLength(resultA, { min: 2, max: 2 })) {
+  if (!Validator.isLength(resultA, { min: 1, max: 2 })) {
     errors.result = 'O placar precisa ter dois digitos (16x00, 16x09)';
   }
 
@@ -19,7 +19,7 @@ exports.validateBet = function (data) {
     errors.result = 'Campo resultado time B em branco, preencha o campo do placar com 00 em caso de derrota';
   }
 
-  if (!Validator.isLength(resultB, { min: 2, max: 2 })) {
+  if (!Validator.isLength(resultB, { min: 1, max: 2 })) {
     errors.result = 'O placar precisa ter dois digitos (16x00, 16x09)';
   }
 

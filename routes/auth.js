@@ -30,15 +30,16 @@ const createToken = (loadedUser, res) => {
     process.env.SECRET_KEY,
     { expiresIn: '1h' },
   );
-  return res.status(200).json({ token });
+  return res.json({ token });
 };
 
 const verifyPassword = async (loadedUser, password, res) => {
   const isEqual = await bcrypt.compare(password, loadedUser.password);
   if (isEqual) {
     createToken(loadedUser, res);
+  } else {
+    return res.status(401).json({ wrongPassword: 'Senha incorreta' });
   }
-  return res.status(401).json({ wrongPassword: 'Senha incorreta' });
 };
 
 router.post('/login', async (req, res) => {
@@ -47,32 +48,6 @@ router.post('/login', async (req, res) => {
 
   const loadedUser = await verifyUsername(username, res);
   verifyPassword(loadedUser, password, res);
-
-  // User.findOne({ username })
-  //   .then((user) => {
-  //     if (!user) {
-  //       return res.status(404).json({ userNotFound: 'Usuario não encontrado' });
-  //     }
-  //     loadedUser = user;
-  //     return bcrypt.compare(password, user.password);
-  //   })
-  //   .then((isEqual) => {
-  //     if (!isEqual) {
-  //       return res.status(401).json({ wrongPassword: 'Senha incorreta' });
-  //     }
-  //     const token = jwt.sign(
-  //       {
-  //         email: loadedUser.email,
-  //         username: loadedUser.username,
-  //         userid: loadedUser._id.toString(),
-  //         userAdmin: loadedUser.admin,
-  //       },
-  //       process.env.SECRET_KEY,
-  //       { expiresIn: '1h' },
-  //     );
-  //     res.status(200).json({ token });
-  //   })
-  //   .catch(err => console.log(err));
 });
 
 // Adicionar novo usuario
