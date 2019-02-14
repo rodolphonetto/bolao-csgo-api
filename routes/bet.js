@@ -6,7 +6,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const router = express.Router();
 const Match = require('../models/match');
 const User = require('../models/user');
-const validators = require('../validation/bet'); // TODO ADICIONAR VALIDAÇÕES
+const validators = require('../validation/bet');
 
 let score;
 
