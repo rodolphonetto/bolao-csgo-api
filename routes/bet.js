@@ -46,11 +46,11 @@ const updateBet = async (betFields, res) => {
     res.json(bet);
   } catch (err) {
     console.log(err);
-    res.status(400);
+    throw new Error(err);
   }
 };
 
-const newBet = async (betFields, res) => {
+const newBet = async (betFields, res, next) => {
   try {
     const {
       match: matchID, user: userID, resultA, resultB,
@@ -70,11 +70,13 @@ const newBet = async (betFields, res) => {
     res.json(bet);
   } catch (err) {
     console.log(err);
-    return res.status(400);
+    const error = new Error('Erro ao adicionar nova aposta.');
+    error.httpStatusCode = 500;
+    return next(error);
   }
 };
 
-router.post('/add-bet', async (req, res) => {
+router.post('/add-bet', async (req, res, next) => {
   const betFields = {};
   const {
     matchID, userID, resultA, resultB,
@@ -96,7 +98,7 @@ router.post('/add-bet', async (req, res) => {
     if (bets.length > 0) {
       updateBet(betFields, res);
     } else {
-      newBet(betFields, res);
+      newBet(betFields, res, next);
     }
   } else {
     res.status(400).json({ msg: 'Você não pode apostar em uma partida fechada' });

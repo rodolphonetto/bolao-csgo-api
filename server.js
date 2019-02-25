@@ -61,6 +61,8 @@ app.use('/matches', match);
 app.use('/bets', bet);
 app.use('/auth', auth);
 
+app.use((error, req, res, next));
+
 const port = process.env.PORT || 5000;
 
 app.listen(port, () => console.log(`Servidor rodando na porta ${port} ${process.env.MONGO_DATABASE}`));
